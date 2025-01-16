@@ -107,17 +107,19 @@ def violin_plot_grouped_by_experiment(gene_data, gene, save = None, plot=True, c
 def plot_lfc(symbol, candidate_genes, columns_to_plot):
     gene_data = candidate_genes[candidate_genes['Symbol'] == symbol]
     
-    fig, ax = plt.subplots(figsize=(12, 6))  # Adjust figure size as needed
+    fig, ax = plt.subplots(figsize=(6, max(6, len(columns_to_plot) * 0.5)))  # Adjust height dynamically
     
-    x = range(len(columns_to_plot))
-    y = [abs(gene_data[col].iloc[0]) for col in columns_to_plot] # Assuming only one row per symbol for now
+    y = range(len(columns_to_plot))
+    x = [abs(gene_data[col].iloc[0]) for col in columns_to_plot]  # Assuming only one row per symbol
     colors = ['green' if gene_data[col].iloc[0] >= 0 else 'red' for col in columns_to_plot]
-
-    ax.bar(x, y, color=colors)
-    ax.set_xticks(x)
-    ax.set_xticklabels(columns_to_plot, rotation=45, ha='right') # Rotate x-axis labels
+    
+    ax.barh(y, x, color=colors)
+    ax.set_yticks(y)
+    ax.set_yticklabels(columns_to_plot)
     ax.set_title(f'LFC for {symbol}')
-    ax.set_ylabel('Absolute LFC')
+    ax.set_xlabel('Absolute LFC')
+    plt.subplots_adjust(left=0.3, right=0.95, top=0.95, bottom=0.05)  # Adjust margins
+    
     return fig
     
 # Function 6: Violin plot grouped by sex and age group
