@@ -1,46 +1,30 @@
-from shiny import App, ui, render
-import pandas as pd
-from itables.widget import ITable
-from shinywidgets import render_widget, output_widget
+from shiny import App, ui
+from selected_gene_table import gene_ui, gene_server
+from sample_explorer import sample_ui, sample_server
+from sample_violin import sample_violin_ui, violin_server
+from gene_lfc import gene_lfc_ui, gene_lfc_server
+from catboost_validation import catboost_validation_ui, catboost_validation_server
 
 # Define the UI
 app_ui = ui.page_fluid(
-    ui.navset_pill(  # Create the tabs
-        ui.nav_panel(
-            "Gene",
-            ui.input_file("file", "Upload your Gene CSV file", accept=[".csv"]),
-            output_widget("gene_table"),  # For the interactive gene table
-        ),
-        ui.nav_panel(
-            "Sample",
-            ui.p("Sample content will go here.")  # Placeholder for the Sample tab
-        ),
+    ui.navset_pill(
+        gene_ui,
+        sample_ui,
+        sample_violin_ui,
+        gene_lfc_ui,
+        catboost_validation_ui,
         id="tab",  # ID for the navigation set
     )
 )
 
 # Define the server logic
 def server(input, output, session):
-    @output
-    @render_widget
-    def gene_table():
-        # Check if a file is uploaded
-        if not input.file():
-            return pd.DataFrame({"Message": ["Please upload a file."]})
-
-        # Read the uploaded file
-        file_info = input.file()[0]
-        df = pd.read_csv(file_info["datapath"])
-
-        # Debugging: Log dataframe to ensure it's being read correctly
-        print(f"DataFrame loaded for pandas table:\n{df.head()}")
-
-        columns_keep = df.columns[:10]  # Limiting to the first 10 columns
-        rows_keep = df.index[:10]      # Limiting to the first 10 rows
-        df = df[columns_keep]
-        df = df.loc[rows_keep]
-        return ITable(caption="A table rendered with ITable", df=df)
-
+    # Call the Gene and Sample server logic
+    gene_server(input, output, session)
+    sample_server(input, output, session)
+    violin_server(input, output, session)
+    gene_lfc_server(input, output, session)
+    catboost_validation_server(input, output, session)
 
 # Create the app
 app = App(app_ui, server)

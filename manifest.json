@@ -1,0 +1,150 @@
+{
+  "version": 1,
+  "locale": "en_IE.UTF-8",
+  "metadata": {
+    "appmode": "python-shiny",
+    "entrypoint": "app"
+  },
+  "python": {
+    "version": "3.11.10",
+    "package_manager": {
+      "name": "pip",
+      "version": "24.3.1",
+      "package_file": "requirements.txt"
+    }
+  },
+  "files": {
+    "requirements.txt": {
+      "checksum": "5d8042b251d2e97355330bbe2df626be"
+    },
+    ".gitattributes": {
+      "checksum": "05bdb783ee6514c8c072e47680af8ff7"
+    },
+    ".gitignore": {
+      "checksum": "6cdb8cc082a20a5edc4ab59d8248be20"
+    },
+    ".vscode/launch.json": {
+      "checksum": "0458f22af6eed3d6d39a561ab1741551"
+    },
+    "LICENSE": {
+      "checksum": "a8ac4828de46b75395d260ac5753fbe1"
+    },
+    "app.py": {
+      "checksum": "ac64d4bbef3dff65340c35805fc49b65"
+    },
+    "catboost_validation.py": {
+      "checksum": "b5151972ad566c3b56a1c867a0e31ec9"
+    },
+    "code/__init__.py": {
+      "checksum": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    "code/__pycache__/__init__.cpython-311.pyc": {
+      "checksum": "a9f11c7ee2098507430739f41b131515"
+    },
+    "data/DDS/RNAseq_abundances_adjusted_combat_inmose_MO_DDS.csv": {
+      "checksum": "216086307492ce991eac4faf5e4fd6b3"
+    },
+    "data/DDS/RNAseq_abundances_adjusted_combat_inmose_male.vs.female_Middle_DDS.csv": {
+      "checksum": "75a3816dc5a2773ebcee58b28a8fc242"
+    },
+    "data/DDS/RNAseq_abundances_adjusted_combat_inmose_male.vs.female_Old_DDS.csv": {
+      "checksum": "75a3816dc5a2773ebcee58b28a8fc242"
+    },
+    "data/DDS/RNAseq_abundances_adjusted_combat_inmose_male.vs.female_Young_DDS.csv": {
+      "checksum": "75a3816dc5a2773ebcee58b28a8fc242"
+    },
+    "data/DDS/RNAseq_abundances_adjusted_combat_inmose_male.vs.female_middle_DDS.csv": {
+      "checksum": "a5d9614724fddb68c3332591706c4706"
+    },
+    "data/DDS/RNAseq_abundances_adjusted_combat_inmose_male.vs.female_old_DDS.csv": {
+      "checksum": "304ea084022bdf80e2713a35702bacba"
+    },
+    "data/DDS/RNAseq_abundances_adjusted_combat_inmose_male.vs.female_young_DDS.csv": {
+      "checksum": "75a3816dc5a2773ebcee58b28a8fc242"
+    },
+    "data/DDS/RNAseq_abundances_adjusted_combat_inmose_middle.vs.old_DDS.csv": {
+      "checksum": "216086307492ce991eac4faf5e4fd6b3"
+    },
+    "data/DDS/RNAseq_abundances_adjusted_combat_inmose_middle.vs.old_female_DDS.csv": {
+      "checksum": "073993e48b046830160b9dc36171a2bc"
+    },
+    "data/DDS/RNAseq_abundances_adjusted_combat_inmose_middle.vs.old_male_DDS.csv": {
+      "checksum": "7dc41f4ab3d926d60ae2c8411d6158b5"
+    },
+    "data/DDS/RNAseq_abundances_adjusted_combat_inmose_young.vs.middle_DDS.csv": {
+      "checksum": "9c9c3e327c025f05da5a8dc55f41c0e6"
+    },
+    "data/DDS/RNAseq_abundances_adjusted_combat_inmose_young.vs.middle_female_DDS.csv": {
+      "checksum": "3f26881dd6d0d7b2b7f173ce6b600eb4"
+    },
+    "data/DDS/RNAseq_abundances_adjusted_combat_inmose_young.vs.middle_male_DDS.csv": {
+      "checksum": "bc801b8fb13282434f7dcf9107e8573f"
+    },
+    "data/DDS/RNAseq_abundances_adjusted_combat_inmose_young.vs.old_DDS.csv": {
+      "checksum": "517fce1c7d9527d99d4baab1111d8e55"
+    },
+    "data/DDS/RNAseq_abundances_adjusted_combat_inmose_young.vs.old_female_DDS.csv": {
+      "checksum": "c05b95e5481abc205e4327fcb22b2ccc"
+    },
+    "data/DDS/RNAseq_abundances_adjusted_combat_inmose_young.vs.old_male_DDS.csv": {
+      "checksum": "c71db2ec5732066cc86a753fb75b5f21"
+    },
+    "data/Intersection_Genes.csv": {
+      "checksum": "7d1841b57ec29106dce89efeb0742399"
+    },
+    "data/RNAseq_abundance_adjusted_combat_inmose_all_lfc.csv": {
+      "checksum": "76ce08f98cb2830a70ecf706fd2ab285"
+    },
+    "data/RNAseq_z_score_adjustedCombat_symbols.csv": {
+      "checksum": "5fded116eac72fbf2f4e452a11864056"
+    },
+    "data/RNAseq_z_score_adjustedCombat_symbols_female.csv": {
+      "checksum": "3c0822e1a25086b708f544ebc352e4a2"
+    },
+    "data/RNAseq_z_score_adjustedCombat_symbols_male.csv": {
+      "checksum": "755b12b18ded05a95ef53added6bd0d2"
+    },
+    "data/Selected_genes_orthologs_pathway_lfc_tissues.csv": {
+      "checksum": "71ad105ec8fdc6dd376e084c42e352a8"
+    },
+    "data/result_subset.json": {
+      "checksum": "f212baf9b1e03b1690df49c210e62362"
+    },
+    "data/results_catboost.csv": {
+      "checksum": "49882597365dd289f8c7657201e517cb"
+    },
+    "data/selected_genes.txt": {
+      "checksum": "bc58edf9124118e59a2d12b32e9eb4ed"
+    },
+    "gene_lfc.py": {
+      "checksum": "895fac44f0d73843a265dffcc5da8863"
+    },
+    "las_wotking.py": {
+      "checksum": "6b80e6ac7c5b17ab18005817be7bb44b"
+    },
+    "only_show_table.py": {
+      "checksum": "7cb2ac17918ed5aa497ca5868fb64005"
+    },
+    "ploting_profiles.py": {
+      "checksum": "76908efe5e3a3add57fa63dd3cf2fdec"
+    },
+    "sample_explorer.py": {
+      "checksum": "6c0f3925eafff421fe495ac7990170b2"
+    },
+    "sample_violin.py": {
+      "checksum": "8e31beb249e7b4d338d9074aacf24108"
+    },
+    "sand_box.ipynb": {
+      "checksum": "977a9cc806ed29014020cd0fccbb0cc7"
+    },
+    "selected_gene_table.py": {
+      "checksum": "e7d809c47079f069c59db3675bb43e44"
+    },
+    "tabs.py": {
+      "checksum": "66b9a561606aaaf212e8c48bba83d2d7"
+    },
+    "upset_de_genes.py": {
+      "checksum": "4c552331df236fd3b99553a01fa6c2e0"
+    }
+  }
+}
