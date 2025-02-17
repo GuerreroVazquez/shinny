@@ -1,6 +1,6 @@
 from shiny import ui, render, App
 import pandas as pd
-from ploting_profiles import violin_plot_grouped_by_sex_and_age_group, box_plot_expression_by_age_and_sex
+from ploting_profiles import violin_plot_grouped_by_sex_and_age_group, box_plot_expression_by_age_and_sex, prepare_box_plot_expression, prepare_violin_plot_expression
 import matplotlib.pyplot as plt
 
 # Load the datasets
@@ -21,10 +21,10 @@ expression_ui = ui.nav_panel(
             ui.sidebar(
                 ui.input_select("gene_vb", "Gene", choices),
                 ui.input_select("plot_type", "Plot", ["Violin Plot", "Box Plot"]),
-                ui.input_select("grouping", "Group", ["Age group", "Age bins"]),
+                ui.input_checkbox("grouping", "Group by age group", True),
                 ui.input_checkbox("split_sex", "Divide sex", False)
             ),
-            #ui.output_plot("ploting_plot")
+            ui.output_plot("ploting_plot")
         )
     )
 )
@@ -40,7 +40,7 @@ def expression_server(input, output, session):
         split_sex = input.split_sex()
 
         if plot_type == "Violin Plot":
-            return violin_plot_grouped_by_sex_and_age_group(expression_data, gene, None, False)
+            fig = prepare_violin_plot_expression(gene_data = expression_data_mf,  gene= gene, age_group=grouping, sex_div=split_sex, save=None, plot=False)
         elif plot_type == "Box Plot":
-            return box_plot_expression_by_age_and_sex(expression_data, gene, None, False)
-        pass
+            fig = prepare_box_plot_expression(gene_data=expression_data_mf, gene= gene, age_group=grouping, sex_div=split_sex, save=None, plot=False)
+        return fig

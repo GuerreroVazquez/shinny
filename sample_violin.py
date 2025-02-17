@@ -45,6 +45,7 @@ def violin_server(input, output, session):
         fig = violin_plot_grouped_by_sex_and_age_group(
             gene_data=expression_data_mf, 
             gene=selected_gene, 
+            age_group=False,
             save=None, 
             plot=False
         )

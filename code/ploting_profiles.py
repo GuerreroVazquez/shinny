@@ -1,1 +1,0 @@
-/home/karen/Documents/GitHub/expression_profiles/ploting_profiles.py

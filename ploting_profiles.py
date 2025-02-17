@@ -14,6 +14,7 @@ labels = ['Young', 'Middle Age', 'Old']
 palette = {'Male': 'blue', 'Female': 'pink'}
 sig_p_value = 0.05
 default_color = 'green'
+
 def get_gene_and_age(df, gene):
     gene_data = df[['Age', gene]].dropna()
     return gene_data
@@ -40,14 +41,17 @@ def scatter_plot_expression_over_age(gene_data, gene, save=None, plot=True):
         plt.savefig(save)
     plt.show()
 
-def violin_plot_grouped_by_age(gene_data, gene, save=None, plot=True, color='green'):
+def violin_plot_grouped_by_age(gene_data, gene, save=None, 
+                               plot=True, color='green'):
     
-    gene_data.loc[:, 'Age Group'] = pd.cut(gene_data['Age'], bins=bins, labels=labels, right=False)
+    #gene_data.loc[:, 'Age Group'] = pd.cut(gene_data['Age'], bins=bins, labels=labels, right=False)
     
     # Plot violin plot
     fig, ax = plt.subplots(figsize=(8, 6))
     #plt.figure(figsize=(8, 6))
-    sns.violinplot(x='Age Group', y=gene, data=gene_data, color=color)
+    sns.violinplot(x='Age Group', 
+                   y=gene, data=gene_data, 
+                   color=color)
     ax.set_title(f"Violin plot of {gene} grouped by Age")
     ax.set_xlabel("Age Group")
     ax.set_ylabel(f"Expression of {gene}")
@@ -128,7 +132,7 @@ def violin_plot_grouped_by_sex_and_age_group(gene_data, gene, save=None, plot=Tr
     if palete is None:
         palete = palette
 
-    gene_data['Age Group'] = pd.cut(gene_data['Age'], bins=bins, labels=labels, right=False)
+    #gene_data['Age Group'] = pd.cut(gene_data['Age'], bins=bins, labels=labels, right=False)
     
     # Plot violin plot
     fig, ax = plt.subplots(figsize=(8, 6))
@@ -335,6 +339,124 @@ def box_plot_expression_by_age_and_sex(
         hue='Sex',
         data=gene_data,
         palette=sex_palette
+    )
+    
+    # Customize the plot
+    plt.title(f"Expression of {gene} Across Age Groups by Sex", fontsize=16)
+    plt.xlabel("Age Group", fontsize=14)
+    plt.ylabel(f"Expression of {gene}", fontsize=14)
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.legend(title="Sex", fontsize=12, title_fontsize=14)
+    
+    # Save the plot if a file path is provided
+    if save:
+        plt.savefig(save, bbox_inches='tight')
+    
+    # Show the plot
+    if plot:
+        plt.show()
+    return fig
+
+def prepare_box_plot_expression(gene_data, gene, age_group=True, sex_div=True, save=None, plot=True, sex_palette=None
+):
+    """
+    This will prepare the box plot for the gene data, if sex is true, it means that it must 
+    plot separate the sexes, if age_group is true, it will plot the gene data by age group young,
+    middle age and old.
+    """
+    if age_group:
+        age_grouping = pd.cut(gene_data['Age'], bins=bins, labels=labels, right=False)
+    else:
+        age_grouping = pd.cut(
+        gene_data['Age'], 
+        bins=np.arange(0, gene_data['Age'].max() + 10, 10), 
+        right=False
+        
+    )
+    gene_data['Age Group'] = age_grouping
+    if sex_div:
+        fig = box_plot_expression_sex(gene_data=gene_data, gene=gene, age_grouping=age_grouping, save=save, plot=plot, sex_palette=sex_palette)
+    else:
+        fig = box_plot_expression(gene_data=gene_data, gene=gene, age_grouping=age_grouping, save=save, plot=plot)
+    return fig
+    
+def prepare_violin_plot_expression(gene_data, gene, age_group=True, sex_div=True, save=None, plot=True, sex_palette=None
+):
+    """
+    This will prepare the box plot for the gene data, if sex is true, it means that it must 
+    plot separate the sexes, if age_group is true, it will plot the gene data by age group young,
+    middle age and old.
+    """
+    if age_group:
+        age_grouping = pd.cut(gene_data['Age'], bins=bins, labels=labels, right=False)
+    else:
+        age_grouping = pd.cut(
+        gene_data['Age'], 
+        bins=np.arange(0, gene_data['Age'].max() + 10, 10), 
+        right=False
+        
+    )
+    gene_data['Age Group'] = age_grouping
+    if sex_div:
+        fig = violin_plot_grouped_by_sex_and_age_group(gene_data=gene_data, gene=gene, save=save, plot=plot, palete=sex_palette)
+    else:
+        fig = violin_plot_grouped_by_age(gene_data=gene_data, gene=gene, save=save, plot=plot)
+    return fig
+
+def box_plot_expression_sex(
+    gene_data, gene, age_grouping,  save=None, plot=True, sex_palette=None
+):
+    # Default palette
+    if sex_palette is None:
+        sex_palette = {'Male': 'navy', 'Female': 'salmon'}
+    
+    # Create age groups in 10-year intervals
+    gene_data['Age Group'] = age_grouping
+
+    # Initialize the figure
+    fig, ax = plt.subplots(figsize=(12, 8))
+    
+    # Create the box plots
+    sns.boxplot(
+        x='Age Group',
+        y=gene,
+        hue='Sex',
+        data=gene_data,
+        palette=sex_palette
+    )
+    
+    # Customize the plot
+    plt.title(f"Expression of {gene} Across Age Groups by Sex", fontsize=16)
+    plt.xlabel("Age Group", fontsize=14)
+    plt.ylabel(f"Expression of {gene}", fontsize=14)
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.legend(title="Sex", fontsize=12, title_fontsize=14)
+    
+    # Save the plot if a file path is provided
+    if save:
+        plt.savefig(save, bbox_inches='tight')
+    
+    # Show the plot
+    if plot:
+        plt.show()
+    return fig
+
+def box_plot_expression(
+    gene_data, gene, age_grouping,  save=None, plot=True, color='green'
+):
+    
+    # Create age groups in 10-year intervals
+    gene_data['Age Group'] = age_grouping
+
+    # Initialize the figure
+    fig, ax = plt.subplots(figsize=(12, 8))
+    
+    # Create the box plots
+    sns.boxplot(
+        x='Age Group',
+        y=gene,
+        data=gene_data,
+        color=color
     )
     
     # Customize the plot
