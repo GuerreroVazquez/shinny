@@ -5,6 +5,8 @@ from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib import rcParams
 import seaborn as sns
 from scipy.stats import ttest_ind
+import plotly.express as px
+import plotly.graph_objects as go
 
 
 
@@ -508,3 +510,70 @@ def create_boxplot_pdf(gene_data, genes, output_file, title="Gene Box Plots", bo
             # Close the figure after saving it to free up memory
             plt.close(fig)
 
+def print_radar_spyder(gene="ALDOA", expression=None, categories = None):
+       if expression is None:
+              return None
+       if categories is None:
+              categories = ['Adipocyte', 'ArtEC', 'B-cell', 'B-plasma', 'CapEC', 'EnFB',
+              'Eosinophil', 'FB', 'Hyb', 'LymphEC', 'MF-I', 'MF-II', 'MF-IIsc(fg)',
+              'MF-IIsn(fg)', 'MF-Isc(fg)', 'MF-Isn(fg)', 'Macrophage', 'Mast',
+              'Mesothelium', 'Monocyte', 'MuSC', 'NK-cell', 'Neutrophil', 'Pericyte',
+              'PnFB', 'RBC', 'SMC', 'Specialised MF', 'T-cell', 'Tenocyte', 'VenEC',
+              'cDC1', 'cDC2', 'mSchwann', 'nmSchwann', 'pDC']
+
+       df = expression.loc[gene]
+       df = pd.DataFrame(df)
+
+       max_category = df[gene].idxmax()
+    
+       # Define color mapping
+       color_map = {
+              'Muscle Cells': 'red',
+              'Lymphoid': 'blue',
+              'Myeloid': 'blue',
+              'Connective Tissue': 'orange',
+              'Nervous System': 'purple',
+              'Support Cells': 'yellow'
+       }
+
+       # Default to pink if not in the defined categories
+       color = color_map.get(max_category, 'pink')
+
+       fig = px.line_polar(df, r = gene, theta=categories, line_close=True)
+       fig.update_traces(fill='toself', line=dict(color=color))
+       #fig.show()
+       return fig
+
+def generate_goScatter(genes=["ALDOA"], expression=None, categories=None):
+       if expression is None:
+              return None
+       if categories is None:
+              categories = ['Connective Tissue', 'Lymphoid',
+                            'Muscle Cells',
+                            'Myeloid',
+                            'Nervous System',
+                            'Red Blood Cell',
+                            'Support Cells',
+                            'Vascular Cells']
+       #df = pd.DataFrame(df)
+       fig = go.Figure()
+       for gene in genes:
+              fig.add_trace(go.Scatterpolar(r = expression.loc[gene], theta=categories, fill='toself', name = gene))
+       return fig
+
+
+def get_top_n_shap_values(shap_values_at_index, feature_names, n=10):
+    # Get the SHAP values for the selected sample
+    shap_values_data = shap_values_at_index.values
+
+    # Get the top n indices using np.argpartition (faster than np.argsort)
+    top_indices = np.argpartition(np.abs(shap_values_data), -n)[-n:]
+
+    # Sort the top indices (as np.argpartition doesn't fully sort)
+    top_indices_sorted = top_indices[np.argsort(np.abs(shap_values_data[top_indices]))[::-1]]
+
+    # Get the top n feature names and their corresponding SHAP values
+    top_features = np.array(feature_names)[top_indices_sorted]
+
+    # Return the top n features and their SHAP values
+    return top_features

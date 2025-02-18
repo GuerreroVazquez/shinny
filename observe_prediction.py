@@ -1,8 +1,11 @@
-from shiny import ui, render
+from shiny import ui, render, reactive
 import shap
 import pandas as pd
 import matplotlib.pyplot as plt
 import pickle
+import numpy as np
+from ploting_profiles import get_top_n_shap_values
+
 
 sample_data = pd.read_csv("data/test_sample_data.csv")
 shap_values_ridge = pickle.load(open("data/shap_values_ridge.pkl", "rb"))
@@ -28,6 +31,7 @@ def observe_pred_server(input, output, session):
     @output
     @render.plot
     def shap_plot():
+        top_genes = reactive.Val([])
         current_sample = input.sample_number()
         if type(current_sample) == int:
             if current_sample is None or current_sample < 1:
@@ -41,5 +45,14 @@ def observe_pred_server(input, output, session):
             shap_values = shap_values_ridge
         else:
             shap_values = shap_values_catboost
+        shap_values_at_index = shap_values[sample_number]
+        feature_names = shap_values.feature_names
+        #top_genes = get_top_n_shap_values(shap_values_at_index=shap_values_at_index, feature_names=feature_names, n=10)
+        top_genes(get_top_n_shap_values(shap_values_at_index=shap_values_at_index, feature_names=feature_names, n=10))
+        
         # Placeholder for your SHAP function
         return shap.plots.waterfall(shap_values[sample_number])
+    @output
+    @render.text
+    def show_top_genes():
+        return str(top_genes())

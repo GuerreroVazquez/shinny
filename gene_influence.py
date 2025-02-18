@@ -8,8 +8,7 @@ import base64
 import pickle
 import shap
 from observe_prediction import observe_pred_ui, observe_pred_server
-from selected_gene_table import gene_ui, gene_server
-from sample_explorer import sample_ui, sample_server
+from observe_lead_genes import observe_lead_server, observe_lead_ui
 # UI for the Sample tab
 
 
@@ -44,6 +43,7 @@ gene_influence_ui = ui.nav_panel(
         ui.page_fluid(
             ui.navset_pill(
                 observe_pred_ui,
+                observe_lead_ui,
 
                 id="geneInfluence",  # ID for the navigation set
             )
@@ -56,6 +56,7 @@ gene_influence_ui = ui.nav_panel(
 # Server logic for the SHAP tab
 def gene_influence_server(input, output, session):
     observe_pred_server(input=input, output=output, session=session)
+    observe_lead_server(input=input, output=output, session=session)
     # Navigation logic
     @reactive.effect
     def update_sample():

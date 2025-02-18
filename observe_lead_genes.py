@@ -2,44 +2,33 @@ from shiny import ui, render
 import shap
 import pandas as pd
 import matplotlib.pyplot as plt
-import pickle
+from shinywidgets import output_widget, render_widget  
+from ploting_profiles import print_radar_spyder, generate_goScatter
 
-sample_data = pd.read_csv("data/test_sample_data.csv")
-shap_values_ridge = pickle.load(open("data/shap_values_ridge.pkl", "rb"))
-shap_values_catboost = pickle.load(open("data/shap_values_catboost.pkl", "rb"))
-
-max_n = len(sample_data)
+proportion_cell_expression= pd.read_csv("data/single_cell/proportion_cell_type_div.csv", index_col=0)
 
 # UI for the SHAP visualization
-observe_pred_ui = ui.nav_panel(
-    "Observe",
-    ui.output_plot("shap_plot"),
-        
-        # Sample navigation controls
-    ui.layout_columns(
-        ui.input_action_button("prev_sample", "⬅️"),
-        ui.input_numeric("sample_number", "", 1, min=1, max=max_n),
-        ui.input_action_button("next_sample", "➡️"),
-    )
+observe_lead_ui = ui.nav_panel(
+    "Lead_genes",
+     ui.input_select(  
+        "see_genes",  
+        "Select options below:",  
+        {"FEZ2": "FEZ2", "ALDOA": "ALDOA", "AC3": "AC3"},  
+        multiple=True,  
+    ),  
+    ui.output_text("value"),
+    output_widget("spidy_plot")
 )
 
 # Server logic for SHAP
-def observe_pred_server(input, output, session):
-    @output
-    @render.plot
-    def shap_plot():
-        current_sample = input.sample_number()
-        if type(current_sample) == int:
-            if current_sample is None or current_sample < 1:
-                current_sample=1
-        else:
-            current_sample=1
-        sample_number = current_sample-1
-        model_name = input.model()
-        shap_values = None
-        if model_name == "Ridge":
-            shap_values = shap_values_ridge
-        else:
-            shap_values = shap_values_catboost
-        # Placeholder for your SHAP function
-        return shap.plots.waterfall(shap_values[sample_number])
+def observe_lead_server(input, output, session):
+    @render.text
+    def value():
+        return f"{input.see_genes()}"
+    
+    #@output
+    @render_widget
+    def spidy_plot():
+        see_genes = list(input.see_genes())
+        plot = generate_goScatter(genes = see_genes, expression=proportion_cell_expression)
+        return plot
