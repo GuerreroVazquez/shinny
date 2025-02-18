@@ -8,7 +8,8 @@ import base64
 import pickle
 import shap
 from observe_prediction import observe_pred_ui, observe_pred_server
-
+from selected_gene_table import gene_ui, gene_server
+from sample_explorer import sample_ui, sample_server
 # UI for the Sample tab
 
 
@@ -23,56 +24,37 @@ sample_data = pd.read_csv("data/test_sample_data.csv")
 
 max_n = len(sample_data)
 # UI for the SHAP tab
-gene_influence_ui = ui.navset_tab( 
-        ui.nav_panel(
-            "SHAP",
-            
-            # Model selection combobox
-            ui.input_select("model", "Model", choices=["Ridge", "Catboost"]),
-            
-            # Disabled sample info section
-            ui.layout_sidebar(
-                ui.sidebar(
-                    ui.input_text("sample_index", "Sample:", value="1"),
-                    ui.input_text("actual_age", "Actual Age:", value="23"),
-                    ui.input_text("predicted_age", "Predicted Age:", value="21"),
-                    ui.input_text("sarcopenic", "Sarcopenic:", value="NO"),
-                    ui.input_text("sample_id", "Sample id:", value="SRR13759025"),
-                    ui.input_text("experiment", "Experiment:", value="GSE1767186"),
-                ),
+gene_influence_ui = ui.nav_panel(
+    "SHAP",
+    
+    # Model selection combobox
+    ui.input_select("model", "Model", choices=["Ridge", "Catboost"]),
+    
+    # Disabled sample info section
+    ui.layout_sidebar(
+        ui.sidebar(
+            ui.input_text("sample_index", "Sample:", value="1"),
+            ui.input_text("actual_age", "Actual Age:", value="23"),
+            ui.input_text("predicted_age", "Predicted Age:", value="21"),
+            ui.input_text("sarcopenic", "Sarcopenic:", value="NO"),
+            ui.input_text("sample_id", "Sample id:", value="SRR13759025"),
+            ui.input_text("experiment", "Experiment:", value="GSE1767186"),
+        ),
+        
+        ui.page_fluid(
+            ui.navset_pill(
+                observe_pred_ui,
 
-                ui.page_fluid(
-                    ui.navset_pill(
-                        observe_pred_ui,
-                        id="tab",  # ID for the navigation set
-                    )
-                )
-            
-        )  
+                id="geneInfluence",  # ID for the navigation set
+            )
+        )
+        
+        
     )
 )
 
 # Server logic for the SHAP tab
 def gene_influence_server(input, output, session):
-    @output
-    @render.plot
-    def shap_plot():
-        current_sample = input.sample_number()
-        if type(current_sample) == int:
-            if current_sample is None or current_sample < 1:
-                current_sample=1
-        else:
-            current_sample=1
-        sample_number = current_sample-1
-        model_name = input.model()
-        shap_values = None
-        if model_name == "Ridge":
-            shap_values = shap_values_ridge
-        else:
-            shap_values = shap_values_catboost
-        # Placeholder for your SHAP function
-        return shap.plots.waterfall(shap_values[sample_number])
-    
     observe_pred_server(input=input, output=output, session=session)
     # Navigation logic
     @reactive.effect
