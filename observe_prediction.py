@@ -21,21 +21,23 @@ sample_data = pd.read_csv("data/test_sample_data.csv")
 
 max_n = len(sample_data)
 # UI for the SHAP tab
-observe_pred_ui = ui.nav_panel(
-    "SHAP",
-    
-    # Disabled sample info section
-    ui.layout_sidebar(
-        # SHAP plot placeholder
-        ui.output_plot("shap_plot"),
+observe_pred_ui =  ui.nav_panel(
+    "ShapValues",
+
+            ui.output_plot("shap_plot"),
+
         
-        # Sample navigation controls
-        ui.layout_columns(
-            ui.input_action_button("prev_sample", "⬅️"),
-            ui.input_numeric("sample_number", "", 1, min=1, max=max_n),
-            ui.input_action_button("next_sample", "➡️"),
-        )
-    )
+            # Sample navigation controls
+            ui.layout_columns(
+                ui.input_action_button("prev_sample", "⬅️"),
+                ui.input_numeric("sample_number", "", 1, min=1, max=max_n),
+                ui.input_action_button("next_sample", "➡️"),
+            )
+        
+    # Disabled sample info section
+    
+        
+    
 )
 
 # Server logic for the SHAP tab

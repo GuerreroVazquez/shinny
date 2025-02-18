@@ -23,24 +23,32 @@ sample_data = pd.read_csv("data/test_sample_data.csv")
 
 max_n = len(sample_data)
 # UI for the SHAP tab
-gene_influence_ui = ui.nav_panel(
-    "SHAP",
-    
-    # Model selection combobox
-    ui.input_select("model", "Model", choices=["Ridge", "Catboost"]),
-    
-    # Disabled sample info section
-    ui.layout_sidebar(
-        ui.sidebar(
-            ui.input_text("sample_index", "Sample:", value="1"),
-            ui.input_text("actual_age", "Actual Age:", value="23"),
-            ui.input_text("predicted_age", "Predicted Age:", value="21"),
-            ui.input_text("sarcopenic", "Sarcopenic:", value="NO"),
-            ui.input_text("sample_id", "Sample id:", value="SRR13759025"),
-            ui.input_text("experiment", "Experiment:", value="GSE1767186"),
-        )
-        
-        
+gene_influence_ui = ui.navset_tab( 
+        ui.nav_panel(
+            "SHAP",
+            
+            # Model selection combobox
+            ui.input_select("model", "Model", choices=["Ridge", "Catboost"]),
+            
+            # Disabled sample info section
+            ui.layout_sidebar(
+                ui.sidebar(
+                    ui.input_text("sample_index", "Sample:", value="1"),
+                    ui.input_text("actual_age", "Actual Age:", value="23"),
+                    ui.input_text("predicted_age", "Predicted Age:", value="21"),
+                    ui.input_text("sarcopenic", "Sarcopenic:", value="NO"),
+                    ui.input_text("sample_id", "Sample id:", value="SRR13759025"),
+                    ui.input_text("experiment", "Experiment:", value="GSE1767186"),
+                ),
+
+                ui.page_fluid(
+                    ui.navset_pill(
+                        observe_pred_ui,
+                        id="tab",  # ID for the navigation set
+                    )
+                )
+            
+        )  
     )
 )
 
