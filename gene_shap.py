@@ -15,7 +15,7 @@ import shap
 shap_values_ridge = pickle.load(open("data/shap_values_ridge.pkl", "rb"))
 shap_values_catboost = pickle.load(open("data/shap_values_catboost.pkl", "rb"))
 # the data of the samples is in "data/test_sample_data.csv"
-sample_data = pd.read_csv("data/test_sample_data.csv")
+sample_data = pd.read_csv("data/validation_sample_data.csv")
 
 
 

@@ -17,7 +17,7 @@ from observe_lead_genes import observe_lead_server, observe_lead_ui
 shap_values_ridge = pickle.load(open("data/shap_values_ridge.pkl", "rb"))
 shap_values_catboost = pickle.load(open("data/shap_values_catboost.pkl", "rb"))
 # the data of the samples is in "data/test_sample_data.csv"
-sample_data = pd.read_csv("data/test_sample_data.csv")
+sample_data = pd.read_csv("data/validation_sample_data.csv")
 
 
 
@@ -79,6 +79,7 @@ def gene_influence_server(input, output, session):
         #    ui.update_numeric("sample_number", value=new_sample)
         
         sample_info = sample_data.loc[current_sample-1]
+        print(sample_info)
         model_name = input.model()
 
         ui.update_text("sample_index", value=str(current_sample))
