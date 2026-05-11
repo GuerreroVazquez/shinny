@@ -51,7 +51,7 @@ def observe_lead_server(input, output, session):
     def value():
         return f"{input.see_genes()}"
     
-    #@output
+    @output
     @render_widget
     def spidy_plot():
         see_genes = list(input.see_genes())
