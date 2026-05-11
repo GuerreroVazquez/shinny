@@ -15,8 +15,11 @@ top_genes_rv = reactive.Value(list(Analysis.top_genes))
 observe_lead_ui = ui.nav_panel(
     "Lead_genes",
     ui.output_ui("dynamic_select"),
+    ui.layout_columns(
+        ui.output_ui("genes_with_data_box"),
+        ui.output_ui("genes_without_data_box"),
+    ),
     ui.p("Single-cell data for these plots was obtained from https://www.muscleageingcellatlas.org/."),
-    ui.output_text("value"),
     output_widget("spidy_plot")
 )
 
@@ -35,11 +38,48 @@ def observe_lead_server(input, output, session):
             get_top_genes(),
             multiple=True,
         )
-    
+
+    @reactive.Calc
+    def split_genes_by_data():
+        selected_genes = input.see_genes() or []
+        genes_with_data = []
+        genes_without_data = []
+        for gene in selected_genes:
+            if gene in proportion_cell_expression.index:
+                genes_with_data.append(gene)
+            else:
+                genes_without_data.append(gene)
+        return genes_with_data, genes_without_data
+
     @output
-    @render.text
-    def value():
-        return f"{input.see_genes()}"
+    @render.ui
+    def genes_with_data_box():
+        genes_with_data, _ = split_genes_by_data()
+        value = ", ".join(genes_with_data)
+        return ui.tags.div(
+            ui.tags.label("Genes with enough data for radar"),
+            ui.tags.textarea(
+                value,
+                readonly=True,
+                rows="4",
+                style="width: 100%;"
+            )
+        )
+
+    @output
+    @render.ui
+    def genes_without_data_box():
+        _, genes_without_data = split_genes_by_data()
+        value = ", ".join(genes_without_data)
+        return ui.tags.div(
+            ui.tags.label("Genes without enough data for radar"),
+            ui.tags.textarea(
+                value,
+                readonly=True,
+                rows="4",
+                style="width: 100%;"
+            )
+        )
     
     @output
     @render_widget
