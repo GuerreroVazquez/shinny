@@ -19,3 +19,9 @@ To run this app locally:
 ```
 shiny run app.py
 ```
+
+By default, the app runs on port **8000**. To use a different port, pass the `--port` flag:
+
+```
+shiny run app.py --port 8080
+```
