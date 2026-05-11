@@ -12,7 +12,7 @@ app_ui = ui.page_fluid(
     ui.navset_pill(
         gene_ui,
         sample_ui,
-        sample_violin_ui,
+        #sample_violin_ui,
         gene_lfc_ui,
         catboost_validation_ui,
         #shap_ui,
@@ -28,7 +28,7 @@ def server(input, output, session):
     # Call the Gene and Sample server logic
     gene_server(input, output, session)
     sample_server(input, output, session)
-    violin_server(input, output, session)
+    #violin_server(input, output, session)
     gene_lfc_server(input, output, session)
     catboost_validation_server(input, output, session)
     #shap_server(input, output, session)

@@ -40,7 +40,7 @@ def expression_server(input, output, session):
         split_sex = input.split_sex()
 
         if plot_type == "Violin Plot":
-            fig = prepare_violin_plot_expression(gene_data = expression_data_mf,  gene= gene, age_group=grouping, sex_div=split_sex, save=None, plot=False)
+            fig = prepare_violin_plot_expression(gene_data = expression_data_mf,  gene= gene, age_group=grouping, sex_div=split_sex, save=None, plot=False, check_significance=True)
         elif plot_type == "Box Plot":
-            fig = prepare_box_plot_expression(gene_data=expression_data_mf, gene= gene, age_group=grouping, sex_div=split_sex, save=None, plot=False)
+            fig = prepare_box_plot_expression(gene_data=expression_data_mf, gene= gene, age_group=grouping, sex_div=split_sex, save=None, plot=False, check_significance=True)
         return fig

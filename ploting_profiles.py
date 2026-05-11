@@ -8,7 +8,8 @@ from scipy.stats import ttest_ind
 import plotly.express as px
 import plotly.graph_objects as go
 
-
+from statannotations.Annotator import Annotator
+import itertools
 
     # Define age groups
 bins = [18, 35, 65, 100]
@@ -44,16 +45,28 @@ def scatter_plot_expression_over_age(gene_data, gene, save=None, plot=True):
     plt.show()
 
 def violin_plot_grouped_by_age(gene_data, gene, save=None, 
-                               plot=True, color='green'):
+                               plot=True, color='green', check_significance=False, test="t-test_ind"):
     
     #gene_data.loc[:, 'Age Group'] = pd.cut(gene_data['Age'], bins=bins, labels=labels, right=False)
     
     # Plot violin plot
     fig, ax = plt.subplots(figsize=(8, 6))
     #plt.figure(figsize=(8, 6))
+    
     sns.violinplot(x='Age Group', 
                    y=gene, data=gene_data, 
                    color=color)
+    # Add statistical annotations
+    if check_significance:
+        text_format="star"
+        loc="inside"
+        comparisons = list(itertools.combinations(gene_data['Age Group'].unique(), 2))
+        print(comparisons)
+        annotator = Annotator(
+            ax, comparisons, data=gene_data, x='Age Group', y=gene
+        )
+        annotator.configure(test=test, text_format=text_format, loc=loc, verbose=1)
+        annotator.apply_and_annotate()
     ax.set_title(f"Violin plot of {gene} grouped by Age")
     ax.set_xlabel("Age Group")
     ax.set_ylabel(f"Expression of {gene}")
@@ -326,7 +339,7 @@ def box_plot_expression_by_age_and_sex(
     # Create age groups in 10-year intervals
     gene_data['Age Group'] = pd.cut(
         gene_data['Age'], 
-        bins=np.arange(0, gene_data['Age'].max() + 10, 10), 
+        bins=np.arange(10, gene_data['Age'].max() + 10, 10), 
         right=False
         
     )
@@ -359,7 +372,7 @@ def box_plot_expression_by_age_and_sex(
         plt.show()
     return fig
 
-def prepare_box_plot_expression(gene_data, gene, age_group=True, sex_div=True, save=None, plot=True, sex_palette=None
+def prepare_box_plot_expression(gene_data, gene, age_group=True, sex_div=True, save=None, plot=True, sex_palette=None, check_significance=False, test="t-test_ind"
 ):
     """
     This will prepare the box plot for the gene data, if sex is true, it means that it must 
@@ -371,18 +384,18 @@ def prepare_box_plot_expression(gene_data, gene, age_group=True, sex_div=True, s
     else:
         age_grouping = pd.cut(
         gene_data['Age'], 
-        bins=np.arange(0, gene_data['Age'].max() + 10, 10), 
+        bins=np.arange(10, gene_data['Age'].max() + 10, 10), 
         right=False
-        
-    )
+        )
+        check_significance = False
     gene_data['Age Group'] = age_grouping
     if sex_div:
         fig = box_plot_expression_sex(gene_data=gene_data, gene=gene, age_grouping=age_grouping, save=save, plot=plot, sex_palette=sex_palette)
     else:
-        fig = box_plot_expression(gene_data=gene_data, gene=gene, age_grouping=age_grouping, save=save, plot=plot)
+        fig = box_plot_expression(gene_data=gene_data, gene=gene, age_grouping=age_grouping, save=save, plot=plot, check_significance=check_significance, test=test)
     return fig
-    
-def prepare_violin_plot_expression(gene_data, gene, age_group=True, sex_div=True, save=None, plot=True, sex_palette=None
+
+def prepare_violin_plot_expression(gene_data, gene, age_group=True, sex_div=True, save=None, plot=True, sex_palette=None, check_significance=False, test="t-test_ind"
 ):
     """
     This will prepare the box plot for the gene data, if sex is true, it means that it must 
@@ -393,16 +406,16 @@ def prepare_violin_plot_expression(gene_data, gene, age_group=True, sex_div=True
         age_grouping = pd.cut(gene_data['Age'], bins=bins, labels=labels, right=False)
     else:
         age_grouping = pd.cut(
-        gene_data['Age'], 
-        bins=np.arange(0, gene_data['Age'].max() + 10, 10), 
-        right=False
-        
-    )
+            gene_data['Age'], 
+            bins=np.arange(10, gene_data['Age'].max() + 10, 10), 
+            right=False
+        )
+        check_significance = False
     gene_data['Age Group'] = age_grouping
     if sex_div:
         fig = violin_plot_grouped_by_sex_and_age_group(gene_data=gene_data, gene=gene, save=save, plot=plot, palete=sex_palette)
     else:
-        fig = violin_plot_grouped_by_age(gene_data=gene_data, gene=gene, save=save, plot=plot)
+        fig = violin_plot_grouped_by_age(gene_data=gene_data, gene=gene, save=save, plot=plot, check_significance=check_significance)
     return fig
 
 def box_plot_expression_sex(
@@ -444,7 +457,7 @@ def box_plot_expression_sex(
     return fig
 
 def box_plot_expression(
-    gene_data, gene, age_grouping,  save=None, plot=True, color='green'
+    gene_data, gene, age_grouping,  save=None, plot=True, color='green', check_significance=False, test="t-test_ind"
 ):
     
     # Create age groups in 10-year intervals
@@ -460,6 +473,18 @@ def box_plot_expression(
         data=gene_data,
         color=color
     )
+
+    # Add statistical annotations
+    if check_significance:
+        text_format="star"
+        loc="inside"
+        comparisons = list(itertools.combinations(age_grouping.unique(), 2))
+        print(comparisons)
+        annotator = Annotator(
+            ax, comparisons, data=gene_data, x='Age Group', y=gene
+        )
+        annotator.configure(test=test, text_format=text_format, loc=loc, verbose=1)
+        annotator.apply_and_annotate()
     
     # Customize the plot
     plt.title(f"Expression of {gene} Across Age Groups by Sex", fontsize=16)
