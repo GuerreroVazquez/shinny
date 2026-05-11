@@ -14,9 +14,8 @@ top_genes_rv = reactive.Value(list(Analysis.top_genes))
 # UI for the SHAP visualization
 observe_lead_ui = ui.nav_panel(
     "Lead_genes",
-    ui.output_ui("dynamic_select"),
     ui.layout_columns(
-        ui.output_ui("genes_with_data_box"),
+        ui.output_ui("dynamic_select"),
         ui.output_ui("genes_without_data_box"),
     ),
     ui.p("Single-cell data for these plots was obtained from https://www.muscleageingcellatlas.org/."),
@@ -26,22 +25,9 @@ observe_lead_ui = ui.nav_panel(
 # Server logic for SHAP
 def observe_lead_server(input, output, session):
     @reactive.Calc
-    def get_top_genes():
-        return {gene: gene for gene in top_genes_rv()}
-
-    @output
-    @render.ui
-    def dynamic_select():
-        return ui.input_select(
-            "see_genes",  
-            "Select options below:",  
-            get_top_genes(),
-            multiple=True,
-        )
-
     @reactive.Calc
     def split_genes_by_data():
-        selected_genes = input.see_genes() or []
+        selected_genes = top_genes_rv()
         genes_with_data = []
         genes_without_data = []
         for gene in selected_genes:
@@ -53,17 +39,14 @@ def observe_lead_server(input, output, session):
 
     @output
     @render.ui
-    def genes_with_data_box():
+    def dynamic_select():
         genes_with_data, _ = split_genes_by_data()
-        value = ", ".join(genes_with_data)
-        return ui.tags.div(
-            ui.tags.label("Genes with enough data for radar"),
-            ui.tags.textarea(
-                value,
-                readonly=True,
-                rows="4",
-                style="width: 100%;"
-            )
+        return ui.input_select(
+            "see_genes",
+            "Select options below:",
+            {gene: gene for gene in genes_with_data},
+            selected=genes_with_data,
+            multiple=True,
         )
 
     @output
