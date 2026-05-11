@@ -50,7 +50,7 @@ def observe_pred_server(input, output, session):
         shap_values_at_index = shap_values[sample_number]
         feature_names = shap_values.feature_names
         #top_genes = get_top_n_shap_values(shap_values_at_index=shap_values_at_index, feature_names=feature_names, n=10)
-        top_genes = get_top_n_shap_values(shap_values_at_index=shap_values_at_index, feature_names=feature_names, n=10)
+        top_genes = get_top_n_shap_values(shap_values_at_index=shap_values_at_index, feature_names=feature_names, n=30)
         Analysis.top_genes = top_genes
         top_genes_rv.set(list(top_genes))
         # Placeholder for your SHAP function
