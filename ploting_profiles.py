@@ -580,10 +580,40 @@ def generate_goScatter(genes=["ALDOA"], expression=None, categories=None):
                             'Red Blood Cell',
                             'Support Cells',
                             'Vascular Cells']
-       #df = pd.DataFrame(df)
        fig = go.Figure()
+       available_genes = []
+       missing_genes = []
        for gene in genes:
+              if gene in expression.index:
+                     available_genes.append(gene)
+              else:
+                     missing_genes.append(gene)
+
+       for gene in available_genes:
               fig.add_trace(go.Scatterpolar(r = expression.loc[gene], theta=categories, fill='toself', name = gene))
+
+       if missing_genes:
+              if len(missing_genes) == 1:
+                     message = f"Not enough data to plot this gene: {missing_genes[0]}"
+              else:
+                     message = "Not enough data to plot these genes: " + ", ".join(missing_genes)
+              fig.add_annotation(
+                     text=message,
+                     x=0.5,
+                     y=0.5,
+                     xref="paper",
+                     yref="paper",
+                     showarrow=False
+              )
+
+       if not available_genes:
+              fig.update_layout(
+                     polar=dict(
+                            radialaxis=dict(visible=False),
+                            angularaxis=dict(visible=False)
+                     ),
+                     showlegend=False
+              )
        return fig
 
 

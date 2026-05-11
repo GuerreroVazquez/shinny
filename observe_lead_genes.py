@@ -15,6 +15,7 @@ top_genes_rv = reactive.Value(list(Analysis.top_genes))
 observe_lead_ui = ui.nav_panel(
     "Lead_genes",
     ui.output_ui("dynamic_select"),
+    ui.p("Single-cell data for these plots were obtained from https://www.muscleageingcellatlas.org/."),
     ui.output_text("value"),
     output_widget("spidy_plot")
 )
