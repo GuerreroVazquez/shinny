@@ -7,16 +7,14 @@ from ploting_profiles import print_radar_spyder, generate_goScatter
 from analysis import Analysis
 
 proportion_cell_expression= Analysis.proportion_cell_expression
-top_genes = Analysis.top_genes
+
+# Reactive value that holds the current top genes so other servers can update it
+top_genes_rv = reactive.Value(list(Analysis.top_genes))
+
 # UI for the SHAP visualization
 observe_lead_ui = ui.nav_panel(
     "Lead_genes",
-     ui.input_select(  
-        "see_genes",  
-        "Select options below:",  
-        {gene: gene for gene in top_genes},  
-        multiple=True,  
-    ),  
+    ui.output_ui("dynamic_select"),
     ui.output_text("value"),
     output_widget("spidy_plot")
 )
@@ -25,28 +23,19 @@ observe_lead_ui = ui.nav_panel(
 def observe_lead_server(input, output, session):
     @reactive.Calc
     def get_top_genes():
-        print(Analysis.top_genes)
-        return ui.input_select(
-            "see_genes",  
-            "Select options below:",  
-            {gene: gene for gene in Analysis.top_genes},  # Use top_genes to populate options
-            multiple=True,
-        )
-    
-        # Assuming you might update top_genes in Analysis class
-        #return {gene: gene for gene in Analysis.top_genes}
-    
+        return {gene: gene for gene in top_genes_rv()}
+
     @output
     @render.ui
     def dynamic_select():
-        print(Analysis.top_genes)
         return ui.input_select(
             "see_genes",  
             "Select options below:",  
-            get_top_genes(),  # Use top_genes to populate options
+            get_top_genes(),
             multiple=True,
         )
     
+    @output
     @render.text
     def value():
         return f"{input.see_genes()}"

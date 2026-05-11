@@ -6,6 +6,7 @@ import pickle
 import numpy as np
 from ploting_profiles import get_top_n_shap_values
 from  analysis import Analysis
+from observe_lead_genes import top_genes_rv
 
 
 sample_data = Analysis.sample_data
@@ -51,5 +52,6 @@ def observe_pred_server(input, output, session):
         #top_genes = get_top_n_shap_values(shap_values_at_index=shap_values_at_index, feature_names=feature_names, n=10)
         top_genes = get_top_n_shap_values(shap_values_at_index=shap_values_at_index, feature_names=feature_names, n=10)
         Analysis.top_genes = top_genes
+        top_genes_rv.set(list(top_genes))
         # Placeholder for your SHAP function
         return shap.plots.waterfall(shap_values[sample_number])
