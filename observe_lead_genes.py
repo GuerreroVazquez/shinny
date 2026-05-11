@@ -54,10 +54,12 @@ def observe_lead_server(input, output, session):
     def genes_without_data_box():
         _, genes_without_data = split_genes_by_data()
         value = ", ".join(genes_without_data)
+        textarea_id = "genes_without_data_textarea"
         return ui.tags.div(
-            ui.tags.label("Genes without enough data for radar"),
+            ui.tags.label("Genes without enough data for radar", **{"for": textarea_id}),
             ui.tags.textarea(
                 value,
+                id=textarea_id,
                 readonly=True,
                 rows="4",
                 style="width: 100%;"
