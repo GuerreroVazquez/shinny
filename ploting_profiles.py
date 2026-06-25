@@ -133,7 +133,8 @@ def plot_lfc(symbol, candidate_genes, columns_to_plot, labels=None):
     y = range(len(columns_to_plot))
     values = [gene_data[col].iloc[0] for col in columns_to_plot]
     x = [abs(v) for v in values]
-    max_x = max(x) if x else 1
+    valid = [v for v in x if not pd.isna(v)]
+    max_x = max(valid) if valid else 1
     colors = ['#0072B2' if v >= 0 else '#E69F00' for v in values]
     
     ax.barh(y, x, color=colors)
@@ -144,6 +145,8 @@ def plot_lfc(symbol, candidate_genes, columns_to_plot, labels=None):
     ax.set_xlim(0, max_x * 1.35)
     
     for i, (val, label) in enumerate(zip(values, labels)):
+        if pd.isna(val):
+            continue
         first_group = label.split(" vs ")[0]
         direction = "\u2191" if val >= 0 else "\u2193"
         ax.text(

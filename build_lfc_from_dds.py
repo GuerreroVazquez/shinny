@@ -19,6 +19,7 @@ for fpath in dds_files:
     print(f"  Reading: {comparison}")
 
     df = pd.read_csv(fpath, index_col=0)
+    df = df[df["padj"] < 0.05]
     lfc_series = df["log2FoldChange"].rename(comparison)
 
     if lfc_data is None:
@@ -27,6 +28,7 @@ for fpath in dds_files:
         lfc_data = lfc_data.join(lfc_series, how="outer")
 
 lfc_data.index.name = None
+lfc_data = lfc_data.round(2)
 lfc_data.to_csv(OUTPUT_FILE)
 print(f"\nSaved consolidated LFC file: {OUTPUT_FILE}")
 print(f"Shape: {lfc_data.shape}")
