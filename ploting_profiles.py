@@ -123,7 +123,9 @@ def violin_plot_grouped_by_experiment(gene_data, gene, save = None, plot=True, c
     return fig
 
 
-def plot_lfc(symbol, candidate_genes, columns_to_plot):
+def plot_lfc(symbol, candidate_genes, columns_to_plot, labels=None):
+    if labels is None:
+        labels = columns_to_plot
     gene_data = candidate_genes[candidate_genes['Symbol'] == symbol]
     
     fig, ax = plt.subplots(figsize=(6, max(6, len(columns_to_plot) * 0.5)))  # Adjust height dynamically
@@ -134,7 +136,7 @@ def plot_lfc(symbol, candidate_genes, columns_to_plot):
     
     ax.barh(y, x, color=colors)
     ax.set_yticks(y)
-    ax.set_yticklabels(columns_to_plot)
+    ax.set_yticklabels(labels)
     ax.set_title(f'LFC for {symbol}')
     ax.set_xlabel('Absolute LFC')
     plt.subplots_adjust(left=0.3, right=0.95, top=0.95, bottom=0.05)  # Adjust margins
