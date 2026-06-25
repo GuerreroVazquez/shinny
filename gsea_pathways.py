@@ -75,13 +75,6 @@ def _gsea_svg_path(db, sample, term):
     return f"{BASE_DIR}/{db}/{sample}/{fname}"
 
 
-def _gsea_svg_url(db, sample, term):
-    p = _gsea_svg_path(db, sample, term)
-    if os.path.exists(p):
-        return p
-    return None
-
-
 # --- Plots ---
 
 def _plot_term_frequencies(db, min_samples=1):
@@ -100,32 +93,6 @@ def _plot_term_frequencies(db, min_samples=1):
     ax.set_yticklabels(short)
     ax.set_xlabel("Samples (count)")
     ax.set_title("Term Frequency Across Samples")
-    plt.tight_layout()
-    return fig
-
-
-def _plot_sample_enrichment(db, sample):
-    enf = _term_enrichment(db)
-    if sample not in enf.columns:
-        fig, ax = plt.subplots(figsize=(8, 4))
-        ax.text(0.5, 0.5, f"No enrichment data for {sample}",
-                ha="center", va="center", transform=ax.transAxes)
-        return fig
-    vals = enf[sample].dropna().sort_values()
-    if vals.empty:
-        fig, ax = plt.subplots(figsize=(8, 4))
-        ax.text(0.5, 0.5, "No enriched terms for this sample",
-                ha="center", va="center", transform=ax.transAxes)
-        return fig
-    colors = ["#0072B2" if v >= 0 else "#E69F00" for v in vals.values]
-    fig, ax = plt.subplots(figsize=(8, max(3, len(vals) * 0.4)))
-    ax.barh(range(len(vals)), vals.values, color=colors)
-    ax.set_yticks(range(len(vals)))
-    short = [t[:50] + "..." if len(t) > 50 else t for t in vals.index]
-    ax.set_yticklabels(short)
-    ax.set_xlabel("Enrichment Score (NES)")
-    ax.set_title(f"Enriched Terms for {sample}")
-    ax.axvline(0, color="gray", linewidth=0.5)
     plt.tight_layout()
     return fig
 
@@ -181,8 +148,7 @@ gsea_pathways_ui = ui.nav_panel(
             ui.nav_panel(
                 "Sample Analysis",
                 ui.output_ui("gsea_sample_ui"),
-                ui.output_ui("gsea_sample_term_ui"),
-                ui.output_ui("gsea_sample_gsea_plot"),
+                ui.output_ui("gsea_sample_gsea_plots"),
                 output_widget("gsea_sample_lead_genes"),
             ),
         ),
@@ -206,28 +172,27 @@ def gsea_pathways_server(input, output, session):
 
     @output
     @render.ui
-    def gsea_sample_term_ui():
+    def gsea_sample_gsea_plots():
         sample = input.gsea_sample()
         if not sample:
             return ui.p("Select a sample above")
         terms = _terms_for_sample(_db(), sample)
         if not terms:
             return ui.p("No GSEA plots available for this sample.")
-        return ui.input_selectize("gsea_term", "Enriched Term", choices=terms, selected=None)
-
-    @output
-    @render.ui
-    def gsea_sample_gsea_plot():
-        sample = input.gsea_sample()
-        term = input.gsea_term()
-        if not sample or not term:
-            return ui.p("Select a sample and term to view the GSEA enrichment plot.")
-        path = _gsea_svg_path(_db(), sample, term)
-        if not os.path.exists(path):
-            return ui.p(f"GSEA plot not found for this term.")
-        with open(path) as f:
-            svg = f.read()
-        return ui.HTML(svg)
+        items = []
+        for term in terms:
+            path = _gsea_svg_path(_db(), sample, term)
+            if not os.path.exists(path):
+                continue
+            with open(path) as f:
+                svg = f.read()
+            items.append(
+                ui.div(
+                    ui.h5(term, style="margin-top: 1.5em;"),
+                    ui.HTML(svg),
+                )
+            )
+        return ui.div(*items)
 
     @output
     @render.ui
@@ -257,13 +222,12 @@ def gsea_pathways_server(input, output, session):
     @render_widget
     def gsea_sample_lead_genes():
         sample = input.gsea_sample()
-        term = input.gsea_term()
-        if not sample or not term:
-            return _it(pd.DataFrame({"Info": ["Select a sample and term above"]}))
+        if not sample:
+            return _it(pd.DataFrame({"Info": ["Select a sample above"]}))
         lg = _lead_genes(_db())
         if lg.empty:
             return _it(pd.DataFrame({"Info": ["No lead gene data available"]}))
-        sub = lg[(lg["Sample"] == sample) & (lg["Term"] == term)][["Term", "Lead_genes"]]
+        sub = lg[lg["Sample"] == sample][["Term", "Lead_genes"]]
         sub.columns = ["Term", "Lead Genes"]
         return _it(sub)
 
