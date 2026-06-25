@@ -121,7 +121,6 @@ gsea_pathways_ui = ui.nav_panel(
     ui.page_sidebar(
         ui.sidebar(
             ui.input_selectize("gsea_db", "Database", DATABASES, selected=DATABASES[0]),
-            ui.input_slider("gsea_min_samples", "Min samples with term", 1, 30, 1),
         ),
         ui.navset_pill(
             ui.nav_panel(
@@ -134,6 +133,7 @@ gsea_pathways_ui = ui.nav_panel(
                     ),
                     ui.nav_panel(
                         "Term Frequency",
+                        ui.output_ui("gsea_min_samples_ui"),
                         ui.output_plot("gsea_term_freq_plot"),
                     ),
                     ui.nav_panel(
@@ -181,6 +181,15 @@ def gsea_pathways_server(input, output, session):
         with open(path) as f:
             svg = f.read()
         return ui.HTML(svg)
+
+    @output
+    @render.ui
+    def gsea_min_samples_ui():
+        db = _db()
+        pres = _term_presence(db)
+        freq = pres.sum(axis=1)
+        max_val = int(freq.max()) if not freq.empty else 1
+        return ui.input_slider("gsea_min_samples", "Min samples with term", 1, max_val, 1)
 
     @output
     @render.plot
