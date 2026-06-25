@@ -4,14 +4,16 @@ from data_cache import load_expression_data
 
 
 with open("data/selected_genes.txt") as f:
-    choices = f.read().splitlines()
+    selected_genes = f.read().splitlines()
+
+gene_choices = {g: f"★ {g}" for g in selected_genes}
 
 expression_ui = ui.nav_panel(
     "Violin",
     ui.page_fluid(
         ui.page_sidebar(
             ui.sidebar(
-                ui.input_select("gene_vb", "Gene", choices),
+                ui.input_selectize("gene_vb", "Gene", choices=gene_choices, options={"create": True}),
                 ui.input_select("plot_type", "Plot", ["Violin Plot", "Box Plot"]),
                 ui.input_checkbox("grouping", "Group by age group", True),
                 ui.input_checkbox("split_sex", "Divide sex", False)
