@@ -97,10 +97,19 @@ def _plot_term_frequencies(db, min_samples=1):
     return fig
 
 
-# --- ORA SVG path ---
+# --- ORA PNG path ---
 
-def _ora_svg_path(db):
-    p = f"{BASE_DIR}/{db}/ora_results_top10.svg"
+_DB_SHORT = {
+    "GO_Biological_Process_2023": "BP",
+    "GO_Molecular_Function_2023": "MF",
+    "KEGG_2021_Human": "KEGG",
+}
+
+def _ora_png_path(db):
+    short = _DB_SHORT.get(db)
+    if not short:
+        return None
+    p = f"data/ORA_{short}.png"
     return p if os.path.exists(p) else None
 
 
@@ -127,7 +136,7 @@ gsea_pathways_ui = ui.nav_panel(
                     ui.nav_panel(
                         "ORA",
                         ui.h4("Over-Representation Analysis (SHAP genes)"),
-                        ui.output_ui("gsea_ora_plot"),
+                        ui.output_image("gsea_ora_plot"),
                     ),
                     ui.nav_panel(
                         "Term Frequency",
@@ -195,14 +204,13 @@ def gsea_pathways_server(input, output, session):
         return ui.div(*items)
 
     @output
-    @render.ui
+    @render.image
     def gsea_ora_plot():
-        path = _ora_svg_path(_db())
+        path = _ora_png_path(_db())
         if not path:
-            return ui.p("ORA results not available for this database.")
-        with open(path) as f:
-            svg = f.read()
-        return ui.HTML(svg)
+            return {"src": "", "alt": "ORA results not available for this database."}
+        return {"src": path, "width": "100%"}
+
 
     @output
     @render.ui
