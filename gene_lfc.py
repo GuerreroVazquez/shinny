@@ -11,39 +11,38 @@ selected_genes_file = "data/selected_genes.txt"
 with open(selected_genes_file, "r") as file:
     choices = file.read().splitlines()
 
-# UI for the Sample tab
+lfc_data = pd.read_csv("data/lfc_from_dds.csv", index_col=0)
+lfc_data.index.name = None
+lfc_data = lfc_data.reset_index().rename(columns={"index": "Symbol"})
+
+columns_to_plot = ['young.vs.middle_female', 'male.vs.female_middle', 'middle.vs.old_male',
+            'male.vs.female_Young', 'young.vs.middle_male', 'male.vs.female_Middle',
+            'middle.vs.old_female', 'MO', 'male.vs.female_old', 'young.vs.old_male',
+            'young.vs.old_female', 'male.vs.female_Old', 'middle.vs.old',
+            'young.vs.old', 'male.vs.female_young', 'young.vs.middle']
+
+# UI for the LogFoldChange tab
 gene_lfc_ui = ui.nav_panel(
     "LogFoldChange",
     ui.input_select(
         "gene_lfc", 
         "Select Gene:", 
-        choices=choices,  # Populate dropdown with gene options
+        choices=choices,
     ),
-    #output_widget("boxplot_output")  # Widget to render the boxplot
     ui.output_plot("lfc_output"),
 )
 
-# Server logic for the Sample tab
+# Server logic for the LogFoldChange tab
 def gene_lfc_server(input, output, session):
     @output
     @render.plot
     def lfc_output():
-        # Capture selected gene from dropdown
         selected_gene = input.gene_lfc()
         
         if not selected_gene:
-            return "Please select a gene to display the boxplot."
+            return
 
-        # Generate the boxplot for the selected gene
-        file_info = input.file_gene()[0]
-        candidate_genes = pd.read_csv(file_info["datapath"])
-        columns_to_plot = ['young.vs.middle_female', 'male.vs.female_middle', 'middle.vs.old_male',
-                    'male.vs.female_Young', 'young.vs.middle_male', 'male.vs.female_Middle',
-                    'middle.vs.old_female', 'MO', 'male.vs.female_old', 'young.vs.old_male',
-                    'young.vs.old_female', 'male.vs.female_Old', 'middle.vs.old',
-                    'young.vs.old', 'male.vs.female_young', 'young.vs.middle']
-        fig = plot_lfc(symbol=selected_gene, candidate_genes=candidate_genes, columns_to_plot=columns_to_plot)
-        
+        fig = plot_lfc(symbol=selected_gene, candidate_genes=lfc_data, columns_to_plot=columns_to_plot)
         
         return fig
 
