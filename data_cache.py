@@ -7,3 +7,10 @@ def load_expression_data():
     male = pd.read_csv("data/RNAseq_z_score_adjustedCombat_symbols_male.csv", index_col=0)
     female = pd.read_csv("data/RNAseq_z_score_adjustedCombat_symbols_female.csv", index_col=0)
     return pd.concat([male, female], axis=0)
+
+
+@cache
+def get_all_gene_names():
+    with open("data/RNAseq_z_score_adjustedCombat_symbols_male.csv") as f:
+        header = f.readline().strip()
+    return sorted(header.split(",")[2:])
