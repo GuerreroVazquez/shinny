@@ -9,7 +9,7 @@ from gene_influence import gene_influence_ui, gene_influence_server
 app_ui = ui.page_fluid(
     ui.navset_pill(
         gene_ui,
-        sample_ui,
+        #sample_ui,
         #sample_violin_ui,
         gene_lfc_ui,
         catboost_validation_ui,
