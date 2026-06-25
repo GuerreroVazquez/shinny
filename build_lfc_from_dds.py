@@ -1,5 +1,4 @@
 import pandas as pd
-import re
 from pathlib import Path
 
 DDS_DIR = Path("data/DDS")
@@ -7,6 +6,8 @@ OUTPUT_FILE = Path("data/lfc_from_dds.csv")
 PREFIX = "RNAseq_abundances_adjusted_combat_inmose_"
 SUFFIX = "_DDS"
 GLOB_PATTERN = f"{PREFIX}*{SUFFIX}.csv"
+
+SKIP = {"MO", "male.vs.female_Young"}
 
 dds_files = sorted(DDS_DIR.glob(GLOB_PATTERN))
 
@@ -16,6 +17,11 @@ lfc_data = None
 
 for fpath in dds_files:
     comparison = fpath.stem.removeprefix(PREFIX).removesuffix(SUFFIX)
+
+    if comparison in SKIP:
+        print(f"  Skipping: {comparison} (duplicate)")
+        continue
+
     print(f"  Reading: {comparison}")
 
     df = pd.read_csv(fpath, index_col=0)

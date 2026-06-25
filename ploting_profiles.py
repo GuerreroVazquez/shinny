@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+from matplotlib.patches import Patch
 from matplotlib import rcParams
 import seaborn as sns
 from scipy.stats import ttest_ind
@@ -144,16 +145,11 @@ def plot_lfc(symbol, candidate_genes, columns_to_plot, labels=None):
     ax.set_xlabel('Absolute LFC')
     ax.set_xlim(0, max_x * 1.35)
     
-    for i, (val, label) in enumerate(zip(values, labels)):
-        if pd.isna(val):
-            continue
-        first_group = label.split(" vs ")[0]
-        direction = "\u2191" if val >= 0 else "\u2193"
-        ax.text(
-            x[i] + max_x * 0.02, i, f"{direction} {first_group}",
-            va="center", fontsize=8,
-            color="#0072B2" if val >= 0 else "#E69F00",
-        )
+    legend_elements = [
+        Patch(facecolor='#0072B2', label='Up regulated'),
+        Patch(facecolor='#E69F00', label='Down regulated'),
+    ]
+    ax.legend(handles=legend_elements, loc='lower right', fontsize=9)
     
     plt.subplots_adjust(left=0.3, right=0.95, top=0.95, bottom=0.05)
     

@@ -43,11 +43,15 @@ lfc_data = lfc_data.reset_index().rename(columns={"index": "Symbol"})
 columns_to_plot = [c for c in DISPLAY_ORDER if c in lfc_data.columns]
 display_labels = [DISPLAY_LABELS.get(c, c) for c in columns_to_plot]
 
-all_genes = lfc_data['Symbol'].unique()
+all_genes = sorted(lfc_data['Symbol'].unique())
+selected_set = set(selected_genes)
 gene_choices = {}
-for g in sorted(all_genes):
-    if g in selected_genes:
+for g in all_genes:
+    if g in selected_set:
         gene_choices[g] = f"★ {g}"
+for g in all_genes:
+    if g not in selected_set:
+        gene_choices[g] = g
 
 gene_lfc_ui = ui.nav_panel(
     "LogFoldChange",
@@ -55,7 +59,6 @@ gene_lfc_ui = ui.nav_panel(
         "gene_lfc", 
         "Select Gene:", 
         choices=gene_choices,
-        options={"create": True},
     ),
     ui.output_plot("lfc_output"),
 )
