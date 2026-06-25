@@ -1,50 +1,84 @@
-from shiny import ui, render, reactive, App
 import pandas as pd
+from shiny import ui, render
 from ploting_profiles import plot_lfc
-import matplotlib.pyplot as plt
-from io import BytesIO
-import base64
 
-
-# Load the datasets
 selected_genes_file = "data/selected_genes.txt"
 with open(selected_genes_file, "r") as file:
-    choices = file.read().splitlines()
+    selected_genes = file.read().splitlines()
 
-# UI for the Sample tab
+DISPLAY_ORDER = [
+    "young.vs.middle",
+    "middle.vs.old",
+    "young.vs.old",
+    "young.vs.middle_female",
+    "middle.vs.old_female",
+    "young.vs.old_female",
+    "young.vs.middle_male",
+    "middle.vs.old_male",
+    "young.vs.old_male",
+    "male.vs.female_young",
+    "male.vs.female_middle",
+    "male.vs.female_old",
+]
+
+DISPLAY_LABELS = {
+    "young.vs.middle": "Young vs Middle Age",
+    "middle.vs.old": "Middle Age vs Old",
+    "young.vs.old": "Young vs Old",
+    "young.vs.middle_female": "Young vs Middle Age (Female)",
+    "middle.vs.old_female": "Middle Age vs Old (Female)",
+    "young.vs.old_female": "Young vs Old (Female)",
+    "young.vs.middle_male": "Young vs Middle Age (Male)",
+    "middle.vs.old_male": "Middle Age vs Old (Male)",
+    "young.vs.old_male": "Young vs Old (Male)",
+    "male.vs.female_young": "Male vs Female (Young)",
+    "male.vs.female_middle": "Male vs Female (Middle Age)",
+    "male.vs.female_old": "Male vs Female (Old)",
+}
+
+lfc_data = pd.read_csv("data/lfc_from_dds.csv", index_col=0)
+lfc_data.index.name = None
+lfc_data = lfc_data.reset_index().rename(columns={"index": "Symbol"})
+
+columns_to_plot = [c for c in DISPLAY_ORDER if c in lfc_data.columns]
+display_labels = [DISPLAY_LABELS.get(c, c) for c in columns_to_plot]
+
+all_genes = sorted(lfc_data['Symbol'].unique())
+selected_set = set(selected_genes)
+gene_choices = {}
+for g in all_genes:
+    if g in selected_set:
+        gene_choices[g] = f"★ {g}"
+for g in all_genes:
+    if g not in selected_set:
+        gene_choices[g] = g
+
 gene_lfc_ui = ui.nav_panel(
     "LogFoldChange",
-    ui.input_select(
+    ui.input_selectize(
         "gene_lfc", 
         "Select Gene:", 
-        choices=choices,  # Populate dropdown with gene options
+        choices=gene_choices,
     ),
-    #output_widget("boxplot_output")  # Widget to render the boxplot
     ui.output_plot("lfc_output"),
 )
 
-# Server logic for the Sample tab
 def gene_lfc_server(input, output, session):
     @output
     @render.plot
     def lfc_output():
-        # Capture selected gene from dropdown
         selected_gene = input.gene_lfc()
-        
-        if not selected_gene:
-            return "Please select a gene to display the boxplot."
 
-        # Generate the boxplot for the selected gene
-        file_info = input.file_gene()[0]
-        candidate_genes = pd.read_csv(file_info["datapath"])
-        columns_to_plot = ['young.vs.middle_female', 'male.vs.female_middle', 'middle.vs.old_male',
-                    'male.vs.female_Young', 'young.vs.middle_male', 'male.vs.female_Middle',
-                    'middle.vs.old_female', 'MO', 'male.vs.female_old', 'young.vs.old_male',
-                    'young.vs.old_female', 'male.vs.female_Old', 'middle.vs.old',
-                    'young.vs.old', 'male.vs.female_young', 'young.vs.middle']
-        fig = plot_lfc(symbol=selected_gene, candidate_genes=candidate_genes, columns_to_plot=columns_to_plot)
-        
-        
+        if not selected_gene:
+            return
+
+        fig = plot_lfc(
+            symbol=selected_gene,
+            candidate_genes=lfc_data,
+            columns_to_plot=columns_to_plot,
+            labels=display_labels,
+        )
+
         return fig
 
 
