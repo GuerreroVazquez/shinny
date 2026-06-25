@@ -3,6 +3,8 @@ from functools import cache
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
+from itables.widget import ITable
+from shinywidgets import render_widget, output_widget
 
 
 BASE_DIR = "data/pers_pathways"
@@ -30,17 +32,6 @@ def _term_presence(db):
 @cache
 def _term_enrichment(db):
     return _load(db, "terms_sample_enrichment_scores_pval_0.2.csv", index_col=0)
-
-
-@cache
-def _merged_sig_terms(db):
-    return _load(db, "merged_sig_terms_non_nan.csv")
-
-
-@cache
-def _terms_genes(db):
-    p = f"{BASE_DIR}/{db}/terms_genes_{db}.csv"
-    return pd.read_csv(p) if os.path.exists(p) else pd.DataFrame()
 
 
 @cache
@@ -115,6 +106,14 @@ def _ora_svg_path(db):
     return p if os.path.exists(p) else None
 
 
+# --- ITable builder ---
+
+def _it(data):
+    if data.empty:
+        return ITable(df=data, scrollY="200px")
+    return ITable(df=data, scrollY="400px", scrollX=True, paging=True, autoWidth=True)
+
+
 # --- UI ---
 
 gsea_pathways_ui = ui.nav_panel(
@@ -126,27 +125,33 @@ gsea_pathways_ui = ui.nav_panel(
         ),
         ui.navset_pill(
             ui.nav_panel(
-                "Group Analysis",
-                ui.h4("Over-Representation Analysis (SHAP genes)"),
-                ui.output_ui("gsea_ora_plot"),
-                ui.hr(),
-                ui.h4("Term Frequency Across Samples"),
-                ui.output_plot("gsea_term_freq_plot"),
-                ui.output_table("gsea_term_table"),
-                ui.hr(),
-                ui.h4("ML-Selected Genes & Pathways"),
-                ui.markdown(
-                    "Pathway mapping for the 9 ML-selected genes "
-                    "based on significant enriched terms from "
-                    "per-sample GSEA using SHAP values as ranking."
+                "General",
+                ui.navset_pill(
+                    ui.nav_panel(
+                        "ORA",
+                        ui.h4("Over-Representation Analysis (SHAP genes)"),
+                        ui.output_ui("gsea_ora_plot"),
+                    ),
+                    ui.nav_panel(
+                        "Term Frequency",
+                        ui.output_plot("gsea_term_freq_plot"),
+                    ),
+                    ui.nav_panel(
+                        "Leading Genes",
+                        ui.markdown(
+                            "Pathway mapping for the 9 ML-selected genes "
+                            "based on significant enriched terms from "
+                            "per-sample GSEA using SHAP values as ranking."
+                        ),
+                        output_widget("gsea_genes_pathways"),
+                    ),
                 ),
-                ui.output_table("gsea_genes_pathways"),
             ),
             ui.nav_panel(
                 "Sample Analysis",
                 ui.output_ui("gsea_sample_ui"),
                 ui.output_plot("gsea_sample_plot"),
-                ui.output_table("gsea_sample_lead_genes"),
+                output_widget("gsea_sample_lead_genes"),
             ),
         ),
     ),
@@ -183,37 +188,6 @@ def gsea_pathways_server(input, output, session):
         return _plot_term_frequencies(_db(), input.gsea_min_samples())
 
     @output
-    @render.table
-    def gsea_term_table():
-        db = _db()
-        pres = _term_presence(db)
-        freq = pres.sum(axis=1).sort_values(ascending=False)
-        freq = freq[freq >= input.gsea_min_samples()]
-        tg = _terms_genes(db)
-        lg = _lead_genes(db)
-        data = []
-        for term in freq.index:
-            n_genes = 0
-            if not tg.empty and "Term" in tg.columns and "Genes" in tg.columns:
-                match = tg[tg["Term"] == term]
-                if not match.empty:
-                    n_genes = len(match["Genes"].iloc[0].split(";"))
-            n_lead = len(lg[lg["Term"] == term]) if not lg.empty else 0
-            related = ""
-            gm = _genes_ml(db)
-            if not gm.empty and "Pathway" in gm.columns:
-                genes = gm[gm["Pathway"] == term]["Gene"].tolist()
-                related = ", ".join(genes) if genes else ""
-            data.append({
-                "Term": term,
-                "Samples": int(freq[term]),
-                "Genes in term": n_genes,
-                "Lead entries": n_lead,
-                "ML-selected genes": related,
-            })
-        return pd.DataFrame(data).head(50)
-
-    @output
     @render.plot
     def gsea_sample_plot():
         sample = input.gsea_sample()
@@ -225,22 +199,22 @@ def gsea_pathways_server(input, output, session):
         return _plot_sample_enrichment(_db(), sample)
 
     @output
-    @render.table
+    @render_widget
     def gsea_sample_lead_genes():
         sample = input.gsea_sample()
         if not sample:
-            return pd.DataFrame({"Info": ["Select a sample above"]})
+            return _it(pd.DataFrame({"Info": ["Select a sample above"]}))
         lg = _lead_genes(_db())
         if lg.empty:
-            return pd.DataFrame({"Info": ["No lead gene data available"]})
+            return _it(pd.DataFrame({"Info": ["No lead gene data available"]}))
         sub = lg[lg["Sample"] == sample][["Term", "Lead_genes"]]
         sub.columns = ["Term", "Lead Genes"]
-        return sub
+        return _it(sub)
 
     @output
-    @render.table
+    @render_widget
     def gsea_genes_pathways():
         gm = _genes_ml(_db())
         if gm.empty:
-            return pd.DataFrame({"Info": ["No pathway data for this database"]})
-        return gm
+            return _it(pd.DataFrame({"Info": ["No pathway data for this database"]}))
+        return _it(gm)
