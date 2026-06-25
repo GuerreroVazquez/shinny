@@ -137,7 +137,7 @@ gsea_pathways_ui = ui.nav_panel(
                     ui.nav_panel(
                         "Leading Genes",
                         ui.markdown(
-                            "Pathway mapping for the 9 ML-selected genes "
+                            "Pathway mapping for the ML-selected genes "
                             "based on significant enriched terms from "
                             "per-sample GSEA using SHAP values as ranking."
                         ),
