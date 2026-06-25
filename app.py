@@ -1,4 +1,5 @@
 from shiny import App, ui
+from welcome import welcome_ui
 from selected_gene_table import gene_ui, gene_server
 from sample_explorer import sample_ui, sample_server
 from gene_lfc import gene_lfc_ui, gene_lfc_server
@@ -8,6 +9,7 @@ from gene_influence import gene_influence_ui, gene_influence_server
 # Define the UI
 app_ui = ui.page_fluid(
     ui.navset_pill(
+        welcome_ui,
         gene_ui,
         #sample_ui,
         #sample_violin_ui,
