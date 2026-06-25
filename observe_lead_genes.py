@@ -1,12 +1,7 @@
 from shiny import ui, render, reactive
-import shap
-import pandas as pd
-import matplotlib.pyplot as plt
 from shinywidgets import output_widget, render_widget  
-from ploting_profiles import print_radar_spyder, generate_goScatter
+from ploting_profiles import generate_goScatter
 from analysis import Analysis
-
-proportion_cell_expression= Analysis.proportion_cell_expression
 
 # Reactive value that holds the current top genes so other servers can update it
 top_genes_rv = reactive.Value(list(Analysis.top_genes))
@@ -30,8 +25,9 @@ def observe_lead_server(input, output, session):
         selected_genes = top_genes_rv()
         genes_with_data = []
         genes_without_data = []
+        cell_expr = Analysis.proportion_cell_expression()
         for gene in selected_genes:
-            if gene in proportion_cell_expression.index:
+            if gene in cell_expr.index:
                 genes_with_data.append(gene)
             else:
                 genes_without_data.append(gene)
@@ -70,5 +66,5 @@ def observe_lead_server(input, output, session):
     @render_widget
     def spidy_plot():
         see_genes = list(input.see_genes())
-        plot = generate_goScatter(genes = see_genes, expression=proportion_cell_expression)
+        plot = generate_goScatter(genes = see_genes, expression=Analysis.proportion_cell_expression())
         return plot

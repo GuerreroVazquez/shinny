@@ -1,6 +1,4 @@
-from shiny import ui, render, reactive
-import shap
-import pandas as pd
+from shiny import ui, render
 from ploting_profiles import get_top_n_shap_values
 from analysis import Analysis
 from observe_lead_genes import top_genes_rv
@@ -23,6 +21,7 @@ def observe_pred_server(input, output, session):
     @output
     @render.plot
     def shap_plot():
+        import shap
         current_sample = input.sample_number()
         if type(current_sample) == int:
             if current_sample is None or current_sample < 1:

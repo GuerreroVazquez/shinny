@@ -1,11 +1,8 @@
-from shiny import ui, render, reactive
-import pandas as pd
+from shiny import ui, reactive
+from analysis import Analysis
 from observe_prediction import observe_pred_ui, observe_pred_server
 from observe_lead_genes import observe_lead_server, observe_lead_ui
 
-
-sample_data = pd.read_csv("data/validation_sample_data.csv")
-max_n = len(sample_data)
 
 gene_influence_ui = ui.nav_panel(
     "SHAP",
@@ -30,6 +27,7 @@ gene_influence_ui = ui.nav_panel(
 )
 
 def gene_influence_server(input, output, session):
+    sample_data = Analysis.sample_data
     observe_pred_server(input=input, output=output, session=session)
     observe_lead_server(input=input, output=output, session=session)
 
