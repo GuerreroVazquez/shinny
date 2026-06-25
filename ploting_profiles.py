@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+from matplotlib.patches import Patch
 from matplotlib import rcParams
 import seaborn as sns
 from scipy.stats import ttest_ind
@@ -123,21 +124,34 @@ def violin_plot_grouped_by_experiment(gene_data, gene, save = None, plot=True, c
     return fig
 
 
-def plot_lfc(symbol, candidate_genes, columns_to_plot):
+def plot_lfc(symbol, candidate_genes, columns_to_plot, labels=None):
+    if labels is None:
+        labels = columns_to_plot
     gene_data = candidate_genes[candidate_genes['Symbol'] == symbol]
     
-    fig, ax = plt.subplots(figsize=(6, max(6, len(columns_to_plot) * 0.5)))  # Adjust height dynamically
+    fig, ax = plt.subplots(figsize=(8, max(6, len(columns_to_plot) * 0.5)))
     
     y = range(len(columns_to_plot))
-    x = [abs(gene_data[col].iloc[0]) for col in columns_to_plot]  # Assuming only one row per symbol
-    colors = ['green' if gene_data[col].iloc[0] >= 0 else 'red' for col in columns_to_plot]
+    values = [gene_data[col].iloc[0] for col in columns_to_plot]
+    x = [abs(v) for v in values]
+    valid = [v for v in x if not pd.isna(v)]
+    max_x = max(valid) if valid else 1
+    colors = ['#0072B2' if v >= 0 else '#E69F00' for v in values]
     
     ax.barh(y, x, color=colors)
     ax.set_yticks(y)
-    ax.set_yticklabels(columns_to_plot)
+    ax.set_yticklabels(labels)
     ax.set_title(f'LFC for {symbol}')
     ax.set_xlabel('Absolute LFC')
-    plt.subplots_adjust(left=0.3, right=0.95, top=0.95, bottom=0.05)  # Adjust margins
+    ax.set_xlim(0, max_x * 1.35)
+    
+    legend_elements = [
+        Patch(facecolor='#0072B2', label='Up regulated'),
+        Patch(facecolor='#E69F00', label='Down regulated'),
+    ]
+    ax.legend(handles=legend_elements, loc='lower right', fontsize=9)
+    
+    plt.subplots_adjust(left=0.3, right=0.95, top=0.95, bottom=0.05)
     
     return fig
     

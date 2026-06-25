@@ -1,19 +1,11 @@
-from shiny import ui, render, App
-import pandas as pd
-from ploting_profiles import violin_plot_grouped_by_sex_and_age_group, box_plot_expression_by_age_and_sex, prepare_box_plot_expression, prepare_violin_plot_expression
-import matplotlib.pyplot as plt
+from shiny import ui, render
+from ploting_profiles import prepare_box_plot_expression, prepare_violin_plot_expression
+from data_cache import load_expression_data
 
-# Load the datasets
-expression_data = pd.read_csv("data/RNAseq_z_score_adjustedCombat_symbols.csv")
-male_expression = pd.read_csv("data/RNAseq_z_score_adjustedCombat_symbols_male.csv", index_col=0)
-female_expression = pd.read_csv("data/RNAseq_z_score_adjustedCombat_symbols_female.csv", index_col=0)
-expression_data_mf = pd.concat([male_expression, female_expression], axis=0)
 
-selected_genes_file = "data/selected_genes.txt"
-with open(selected_genes_file, "r") as file:
-    choices = file.read().splitlines()
+with open("data/selected_genes.txt") as f:
+    choices = f.read().splitlines()
 
-# UI
 expression_ui = ui.nav_panel(
     "Violin",
     ui.page_fluid(
@@ -29,7 +21,6 @@ expression_ui = ui.nav_panel(
     )
 )
 
-# Server
 def expression_server(input, output, session):
     @output
     @render.plot
@@ -38,9 +29,10 @@ def expression_server(input, output, session):
         plot_type = input.plot_type()
         grouping = input.grouping()
         split_sex = input.split_sex()
+        gene_data = load_expression_data()
 
         if plot_type == "Violin Plot":
-            fig = prepare_violin_plot_expression(gene_data = expression_data_mf,  gene= gene, age_group=grouping, sex_div=split_sex, save=None, plot=False, check_significance=True)
+            fig = prepare_violin_plot_expression(gene_data=gene_data, gene=gene, age_group=grouping, sex_div=split_sex, save=None, plot=False, check_significance=True)
         elif plot_type == "Box Plot":
-            fig = prepare_box_plot_expression(gene_data=expression_data_mf, gene= gene, age_group=grouping, sex_div=split_sex, save=None, plot=False, check_significance=True)
+            fig = prepare_box_plot_expression(gene_data=gene_data, gene=gene, age_group=grouping, sex_div=split_sex, save=None, plot=False, check_significance=True)
         return fig
