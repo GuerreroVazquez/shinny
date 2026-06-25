@@ -3,6 +3,7 @@ from functools import cache
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
+import json
 from itables.widget import ITable
 from shinywidgets import render_widget, output_widget
 
@@ -46,9 +47,39 @@ def _genes_ml(db):
     return pd.read_csv(p) if os.path.exists(p) else pd.DataFrame()
 
 
+@cache
+def _samples_terms_json(db):
+    p = f"{BASE_DIR}/{db}/all_samples_terms.json"
+    if not os.path.exists(p):
+        return {}
+    with open(p) as f:
+        return json.load(f)
+
+
 def _samples_with_terms(db):
     df = _samples_term_df(db)
     return sorted(df.loc[df["Enriched_terms_count"] > 0, "Sample"].tolist())
+
+
+def _terms_for_sample(db, sample):
+    data = _samples_terms_json(db)
+    terms = data.get(sample, [])
+    return [
+        t for t in terms
+        if os.path.exists(_gsea_svg_path(db, sample, t))
+    ]
+
+
+def _gsea_svg_path(db, sample, term):
+    fname = f"GSEA_plot_{term.replace('/', '_').replace(' ', '_')}.svg"
+    return f"{BASE_DIR}/{db}/{sample}/{fname}"
+
+
+def _gsea_svg_url(db, sample, term):
+    p = _gsea_svg_path(db, sample, term)
+    if os.path.exists(p):
+        return p
+    return None
 
 
 # --- Plots ---
@@ -150,7 +181,8 @@ gsea_pathways_ui = ui.nav_panel(
             ui.nav_panel(
                 "Sample Analysis",
                 ui.output_ui("gsea_sample_ui"),
-                ui.output_plot("gsea_sample_plot"),
+                ui.output_ui("gsea_sample_term_ui"),
+                ui.output_ui("gsea_sample_gsea_plot"),
                 output_widget("gsea_sample_lead_genes"),
             ),
         ),
@@ -171,6 +203,31 @@ def gsea_pathways_server(input, output, session):
     def gsea_sample_ui():
         samples = _samples_with_terms(_db())
         return ui.input_selectize("gsea_sample", "Sample", choices=samples, selected=None)
+
+    @output
+    @render.ui
+    def gsea_sample_term_ui():
+        sample = input.gsea_sample()
+        if not sample:
+            return ui.p("Select a sample above")
+        terms = _terms_for_sample(_db(), sample)
+        if not terms:
+            return ui.p("No GSEA plots available for this sample.")
+        return ui.input_selectize("gsea_term", "Enriched Term", choices=terms, selected=None)
+
+    @output
+    @render.ui
+    def gsea_sample_gsea_plot():
+        sample = input.gsea_sample()
+        term = input.gsea_term()
+        if not sample or not term:
+            return ui.p("Select a sample and term to view the GSEA enrichment plot.")
+        path = _gsea_svg_path(_db(), sample, term)
+        if not os.path.exists(path):
+            return ui.p(f"GSEA plot not found for this term.")
+        with open(path) as f:
+            svg = f.read()
+        return ui.HTML(svg)
 
     @output
     @render.ui
@@ -197,26 +254,16 @@ def gsea_pathways_server(input, output, session):
         return _plot_term_frequencies(_db(), input.gsea_min_samples())
 
     @output
-    @render.plot
-    def gsea_sample_plot():
-        sample = input.gsea_sample()
-        if not sample:
-            fig, ax = plt.subplots(figsize=(8, 4))
-            ax.text(0.5, 0.5, "Select a sample above",
-                    ha="center", va="center", transform=ax.transAxes)
-            return fig
-        return _plot_sample_enrichment(_db(), sample)
-
-    @output
     @render_widget
     def gsea_sample_lead_genes():
         sample = input.gsea_sample()
-        if not sample:
-            return _it(pd.DataFrame({"Info": ["Select a sample above"]}))
+        term = input.gsea_term()
+        if not sample or not term:
+            return _it(pd.DataFrame({"Info": ["Select a sample and term above"]}))
         lg = _lead_genes(_db())
         if lg.empty:
             return _it(pd.DataFrame({"Info": ["No lead gene data available"]}))
-        sub = lg[lg["Sample"] == sample][["Term", "Lead_genes"]]
+        sub = lg[(lg["Sample"] == sample) & (lg["Term"] == term)][["Term", "Lead_genes"]]
         sub.columns = ["Term", "Lead Genes"]
         return _it(sub)
 
