@@ -570,21 +570,51 @@ def print_radar_spyder(gene="ALDOA", expression=None, categories = None):
        return fig
 
 def generate_goScatter(genes=["ALDOA"], expression=None, categories=None):
-       if expression is None:
-              return None
-       if categories is None:
-              categories = ['Connective Tissue', 'Lymphoid',
-                            'Muscle Cells',
-                            'Myeloid',
-                            'Nervous System',
-                            'Red Blood Cell',
-                            'Support Cells',
-                            'Vascular Cells']
-       #df = pd.DataFrame(df)
-       fig = go.Figure()
-       for gene in genes:
-              fig.add_trace(go.Scatterpolar(r = expression.loc[gene], theta=categories, fill='toself', name = gene))
-       return fig
+    if expression is None:
+        return None
+    if categories is None:
+        categories = ['Connective Tissue', 'Lymphoid',
+                      'Muscle Cells',
+                      'Myeloid',
+                      'Nervous System',
+                      'Red Blood Cell',
+                      'Support Cells',
+                      'Vascular Cells']
+    fig = go.Figure()
+    available_genes = []
+    missing_genes = []
+    for gene in genes:
+        if gene in expression.index:
+            available_genes.append(gene)
+        else:
+            missing_genes.append(gene)
+
+    for gene in available_genes:
+        fig.add_trace(go.Scatterpolar(r=expression.loc[gene], theta=categories, fill='toself', name=gene))
+
+    if missing_genes:
+        if len(missing_genes) == 1:
+            message = f"Not enough data to plot this gene: {missing_genes[0]}"
+        else:
+            message = "Not enough data to plot these genes: " + ", ".join(missing_genes)
+        fig.add_annotation(
+            text=message,
+            x=0.5,
+            y=0.5,
+            xref="paper",
+            yref="paper",
+            showarrow=False
+        )
+
+    if not available_genes:
+        fig.update_layout(
+            polar=dict(
+                radialaxis=dict(visible=False),
+                angularaxis=dict(visible=False)
+            ),
+            showlegend=False
+        )
+    return fig
 
 
 def get_top_n_shap_values(shap_values_at_index, feature_names, n=10):
