@@ -1,10 +1,8 @@
 from shiny import App, ui
 from selected_gene_table import gene_ui, gene_server
 from sample_explorer import sample_ui, sample_server
-from sample_violin import sample_violin_ui, violin_server
 from gene_lfc import gene_lfc_ui, gene_lfc_server
 from catboost_validation import catboost_validation_ui, catboost_validation_server
-from gene_shap import shap_ui, shap_server
 from expression_violinBox import expression_ui, expression_server
 from gene_influence import gene_influence_ui, gene_influence_server
 # Define the UI

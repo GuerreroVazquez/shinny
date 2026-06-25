@@ -1,19 +1,10 @@
-from shiny import ui, render, reactive, App
 import pandas as pd
+from shiny import ui, render
 from ploting_profiles import plot_lfc
-import matplotlib.pyplot as plt
-from io import BytesIO
-import base64
-
 
 selected_genes_file = "data/selected_genes.txt"
 with open(selected_genes_file, "r") as file:
     selected_genes = file.read().splitlines()
-
-COLUMN_ALIASES = {
-    "MO": "middle.vs.old",
-    "male.vs.female_Young": "male.vs.female_young",
-}
 
 DISPLAY_ORDER = [
     "young.vs.middle",
@@ -47,25 +38,16 @@ DISPLAY_LABELS = {
 
 lfc_data = pd.read_csv("data/lfc_from_dds.csv", index_col=0)
 lfc_data.index.name = None
-
-aliased_in_data = [c for c in lfc_data.columns if c in COLUMN_ALIASES]
-if aliased_in_data:
-    lfc_data = lfc_data.drop(columns=aliased_in_data)
-
 lfc_data = lfc_data.reset_index().rename(columns={"index": "Symbol"})
 
 columns_to_plot = [c for c in DISPLAY_ORDER if c in lfc_data.columns]
 display_labels = [DISPLAY_LABELS.get(c, c) for c in columns_to_plot]
 
-selected_set = set(selected_genes)
-all_genes = sorted(lfc_data['Symbol'].unique())
+all_genes = lfc_data['Symbol'].unique()
 gene_choices = {}
-for g in all_genes:
-    if g in selected_set:
+for g in sorted(all_genes):
+    if g in selected_genes:
         gene_choices[g] = f"★ {g}"
-for g in all_genes:
-    if g not in selected_set:
-        gene_choices[g] = g
 
 gene_lfc_ui = ui.nav_panel(
     "LogFoldChange",
@@ -73,6 +55,7 @@ gene_lfc_ui = ui.nav_panel(
         "gene_lfc", 
         "Select Gene:", 
         choices=gene_choices,
+        options={"create": True},
     ),
     ui.output_plot("lfc_output"),
 )
