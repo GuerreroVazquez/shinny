@@ -128,18 +128,31 @@ def plot_lfc(symbol, candidate_genes, columns_to_plot, labels=None):
         labels = columns_to_plot
     gene_data = candidate_genes[candidate_genes['Symbol'] == symbol]
     
-    fig, ax = plt.subplots(figsize=(6, max(6, len(columns_to_plot) * 0.5)))  # Adjust height dynamically
+    fig, ax = plt.subplots(figsize=(8, max(6, len(columns_to_plot) * 0.5)))
     
     y = range(len(columns_to_plot))
-    x = [abs(gene_data[col].iloc[0]) for col in columns_to_plot]  # Assuming only one row per symbol
-    colors = ['green' if gene_data[col].iloc[0] >= 0 else 'red' for col in columns_to_plot]
+    values = [gene_data[col].iloc[0] for col in columns_to_plot]
+    x = [abs(v) for v in values]
+    max_x = max(x) if x else 1
+    colors = ['#0072B2' if v >= 0 else '#E69F00' for v in values]
     
     ax.barh(y, x, color=colors)
     ax.set_yticks(y)
     ax.set_yticklabels(labels)
     ax.set_title(f'LFC for {symbol}')
     ax.set_xlabel('Absolute LFC')
-    plt.subplots_adjust(left=0.3, right=0.95, top=0.95, bottom=0.05)  # Adjust margins
+    ax.set_xlim(0, max_x * 1.35)
+    
+    for i, (val, label) in enumerate(zip(values, labels)):
+        first_group = label.split(" vs ")[0]
+        direction = "\u2191" if val >= 0 else "\u2193"
+        ax.text(
+            x[i] + max_x * 0.02, i, f"{direction} {first_group}",
+            va="center", fontsize=8,
+            color="#0072B2" if val >= 0 else "#E69F00",
+        )
+    
+    plt.subplots_adjust(left=0.3, right=0.95, top=0.95, bottom=0.05)
     
     return fig
     
