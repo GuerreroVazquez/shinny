@@ -118,7 +118,7 @@ gsea_pathways_ui = ui.nav_panel(
     "GSEA Pathways",
     ui.page_sidebar(
         ui.sidebar(
-            ui.input_selectize("gsea_db", "Database", DATABASES, selected=DATABASES[0]),
+            ui.input_selectize("gsea_db", "Database", {db: db.replace("_", " ") for db in DATABASES}, selected=DATABASES[0]),
         ),
         ui.navset_pill(
             ui.nav_panel(
