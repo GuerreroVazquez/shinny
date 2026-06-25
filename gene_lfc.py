@@ -8,7 +8,7 @@ import base64
 
 selected_genes_file = "data/selected_genes.txt"
 with open(selected_genes_file, "r") as file:
-    choices = file.read().splitlines()
+    selected_genes = file.read().splitlines()
 
 COLUMN_ALIASES = {
     "MO": "middle.vs.old",
@@ -57,12 +57,22 @@ lfc_data = lfc_data.reset_index().rename(columns={"index": "Symbol"})
 columns_to_plot = [c for c in DISPLAY_ORDER if c in lfc_data.columns]
 display_labels = [DISPLAY_LABELS.get(c, c) for c in columns_to_plot]
 
+selected_set = set(selected_genes)
+all_genes = sorted(lfc_data['Symbol'].unique())
+gene_choices = {}
+for g in all_genes:
+    if g in selected_set:
+        gene_choices[g] = f"★ {g}"
+for g in all_genes:
+    if g not in selected_set:
+        gene_choices[g] = g
+
 gene_lfc_ui = ui.nav_panel(
     "LogFoldChange",
-    ui.input_select(
+    ui.input_selectize(
         "gene_lfc", 
         "Select Gene:", 
-        choices=choices,
+        choices=gene_choices,
     ),
     ui.output_plot("lfc_output"),
 )
