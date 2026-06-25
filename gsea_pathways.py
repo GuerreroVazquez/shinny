@@ -242,7 +242,7 @@ def gsea_pathways_server(input, output, session):
     @output
     @render_widget
     def gsea_genes_pathways():
-        gm = _genes_ml(_db())
-        if gm.empty:
-            return _it(pd.DataFrame({"Info": ["No pathway data for this database"]}))
-        return _it(gm)
+        lg = _lead_genes(_db())
+        if lg.empty:
+            return _it(pd.DataFrame({"Info": ["No lead gene data available"]}))
+        return _it(lg)
