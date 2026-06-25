@@ -27,9 +27,7 @@ DISPLAY_ORDER = [
     "young.vs.old_male",
     "male.vs.female_young",
     "male.vs.female_middle",
-    "male.vs.female_Middle",
     "male.vs.female_old",
-    "male.vs.female_Old",
 ]
 
 DISPLAY_LABELS = {
@@ -44,9 +42,7 @@ DISPLAY_LABELS = {
     "young.vs.old_male": "Young vs Old (Male)",
     "male.vs.female_young": "Male vs Female (Young)",
     "male.vs.female_middle": "Male vs Female (Middle Age)",
-    "male.vs.female_Middle": "Male vs Female (Middle Age, alt)",
     "male.vs.female_old": "Male vs Female (Old)",
-    "male.vs.female_Old": "Male vs Female (Old, alt)",
 }
 
 lfc_data = pd.read_csv("data/lfc_from_dds.csv", index_col=0)
